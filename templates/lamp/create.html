@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Taklifnoma yaratish{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4 p-4 p-md-5 position-relative overflow-hidden">
+                <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 6px; background: linear-gradient(90deg, #4f46e5, #ec4899) !important;"></div>
+                
+                <div class="text-center mb-5">
+                    <div class="mb-3 text-primary display-5">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                    </div>
+                    <h2 class="playfair fw-bold display-6">Taklifnoma Yaratish</h2>
+                    <p class="text-muted">Tadbir tafsilotlarini kiriting va bir soniyada o'z zamonaviy havolangizga ega bo'ling</p>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger border-0 shadow-sm rounded-3 p-3 mb-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fa-solid fa-triangle-exclamation fs-4 me-2 text-danger"></i>
+                                <strong class="text-danger">Iltimos, xatoliklarni to'g'irlang:</strong>
+                            </div>
+                            <ul class="mb-0 ps-3 small">
+                                {% for field, errors in form.errors.items %}
+                                    <li><strong>{{ field }}:</strong> {{ errors|striptags }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold"><i class="fa-solid fa-champagne-glasses me-1 text-primary"></i> {{ form.event_type.label }}</label>
+                            {{ form.event_type }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold"><i class="fa-solid fa-palette me-1 text-primary"></i> {{ form.template_style.label }}</label>
+                            {{ form.template_style }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"><i class="fa-solid fa-heading me-1 text-primary"></i> {{ form.title.label }}</label>
+                        {{ form.title }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"><i class="fa-solid fa-user-group me-1 text-primary"></i> {{ form.hosts.label }}</label>
+                        {{ form.hosts }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"><i class="fa-solid fa-users me-1 text-primary"></i> {{ form.guest_name.label }}</label>
+                        {{ form.guest_name }}
+                        <div class="form-text small">Bo'sh qoldirsangiz hammaga umumiy bo'ladi. Har bir qatorga bitta mehmon ismini yozib, xohlagancha odam qo'shishingiz mumkin.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"><i class="fa-solid fa-calendar-days me-1 text-primary"></i> {{ form.event_datetime.label }}</label>
+                        {{ form.event_datetime }}
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold"><i class="fa-solid fa-building me-1 text-primary"></i> {{ form.venue_name.label }}</label>
+                            {{ form.venue_name }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold"><i class="fa-solid fa-location-dot me-1 text-primary"></i> {{ form.venue_address.label }}</label>
+                            {{ form.venue_address }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"><i class="fa-solid fa-message me-1 text-primary"></i> {{ form.message.label }}</label>
+                        {{ form.message }}
+                    </div>
+
+                    <div class="card bg-light border-0 p-3 mb-4 rounded-3">
+                        <h6 class="fw-bold mb-3 text-secondary"><i class="fa-solid fa-photo-film me-1"></i> Media va Eslatmalar (Ixtiyoriy)</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">{{ form.cover_image.label }}</label>
+                            {{ form.cover_image }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">{{ form.audio_file.label }}</label>
+                            {{ form.audio_file }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">{{ form.video_file.label }}</label>
+                            {{ form.video_file }}
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label small fw-semibold">{{ form.reminder_hours.label }} (Soat)</label>
+                            {{ form.reminder_hours }}
+                            <div class="form-text small">Tadbir boshlanishidan qancha soat oldin eslatma yuborilishi (masalan: 24).</div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold py-3 shadow-lg rounded-pill hover-scale" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border: none;">
+                            <i class="fa-solid fa-check-circle me-2"></i> Taklifnoma yaratish va Havola olish
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-scale {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hover-scale:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4) !important;
+    }
+</style>
+{% endblock %}

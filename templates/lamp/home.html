@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Bosh sahifa - Elektron Taklifnomalar{% endblock %}
+
+{% block content %}
+<div class="py-5 mb-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);">
+    <div class="container py-5 text-center position-relative z-1">
+        <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 rounded-pill fw-semibold mb-3 backdrop-blur shadow-sm">
+            <i class="fa-solid fa-wand-magic-sparkles me-1 text-warning"></i> Yangi avlod zamonaviy taklifnomalari
+        </span>
+        <h1 class="display-3 fw-bold mb-4 playfair text-white">Unutilmas Kuningizni Bizing Bilan Boshlang</h1>
+        <p class="lead mb-5 col-lg-8 mx-auto text-white text-opacity-90 fs-5">
+            To'y, fotiha, sunnat to'yi yoki jubiley uchun 2 daqiqada mukammal elektron taklifnoma yarating. RSVP kelishni tasdiqlash, PC/telefon uchun eslatmalar, fon musiqasi va lokatsiya bilan!
+        </p>
+        
+        <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+            <a href="{% url 'create_invitation' %}?style=paper" class="btn btn-warning btn-lg text-dark fw-bold px-4 py-3 shadow-lg rounded-pill hover-scale">
+                <i class="fa-solid fa-feather me-2"></i> Klassik Oqshom
+            </a>
+            <a href="{% url 'create_invitation' %}?style=royal" class="btn btn-dark btn-lg text-warning fw-bold px-4 py-3 shadow-lg rounded-pill border border-warning hover-scale">
+                <i class="fa-solid fa-crown me-2"></i> Qirollik Kechasi
+            </a>
+            <a href="{% url 'create_invitation' %}?style=rose" class="btn btn-danger btn-lg text-white fw-bold px-4 py-3 shadow-lg rounded-pill hover-scale">
+                <i class="fa-solid fa-heart me-2"></i> Nozik Atirgul
+            </a>
+            <a href="{% url 'create_invitation' %}?style=video" class="btn btn-light btn-lg text-primary fw-bold px-4 py-3 shadow-lg rounded-pill hover-scale">
+                <i class="fa-solid fa-video me-2"></i> Video Taklifnoma
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-5 text-center">
+        <div class="text-primary display-5 mb-3"><i class="fa-solid fa-lock"></i></div>
+        <h2 class="playfair fw-bold">Taklifnomalaringiz shaxsiy saqlanadi</h2>
+        <p class="text-muted mb-4">Siz yaratgan taklifnomalarni faqat shu brauzerdagi shaxsiy ro‘yxatingizdan ko‘rasiz. Mehmonlar esa faqat ulashgan havolangiz orqali kiradi.</p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="{% url 'my_invitations' %}" class="btn btn-outline-primary btn-lg rounded-pill px-4">
+                <i class="fa-solid fa-folder-open me-2"></i>Mening taklifnomalarim
+            </a>
+            <a href="{% url 'create_invitation' %}" class="btn btn-primary btn-lg rounded-pill px-4">
+                <i class="fa-solid fa-plus me-2"></i>Taklifnoma yaratish
+            </a>
+        </div>
+    </div>
+    <div class="text-center mb-5">
+        <h2 class="playfair fw-bold display-6">Nima uchun aynan bizni tanlashadi?</h2>
+        <p class="text-muted">Mehmonlaringiz hayratda qoldiradigan ilg'or imkoniyatlar</p>
+    </div>
+
+    <div class="row text-center g-4">
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-lift">
+                <div class="card-body">
+                    <div class="text-primary mb-3 fs-1 bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3">
+                        <i class="fa-solid fa-users-rectangle"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-2">RSVP & Tabriklar</h3>
+                    <p class="text-muted small mb-0">Mehmonlar kelishini tasdiqlashi va o'z samimiy tabriklarini yozib qoldirishi mumkin.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-lift">
+                <div class="card-body">
+                    <div class="text-warning mb-3 fs-1 bg-warning bg-opacity-10 rounded-circle d-inline-flex p-3">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-2">Push Eslatmalar</h3>
+                    <p class="text-muted small mb-0">1 minutdan 72 soatgacha bo'lgan oraliqda telefon va PC qurilmalariga eslatmalar.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-lift">
+                <div class="card-body">
+                    <div class="text-success mb-3 fs-1 bg-success bg-opacity-10 rounded-circle d-inline-flex p-3">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-2">Lokatsiya & Kalendar</h3>
+                    <p class="text-muted small mb-0">Google Maps va Google Calendar integratsiyasi orqali manzildan osongina topasiz.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-lift">
+                <div class="card-body">
+                    <div class="text-danger mb-3 fs-1 bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3">
+                        <i class="fa-solid fa-champagne-glasses"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-2">Bayramona Effektlar</h3>
+                    <p class="text-muted small mb-0">Konfetti animatsiyalari, fon musiqasi va teskari hisoblagich (Countdown timer).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+    }
+    .hover-scale {
+        transition: transform 0.2s ease;
+    }
+    .hover-scale:hover {
+        transform: scale(1.03);
+    }
+</style>
+{% endblock %}

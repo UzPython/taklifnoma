@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Taklifnoma tayyor!{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 text-center">
+            <div class="card shadow-lg border-0 rounded-4 p-5">
+                <div class="mb-4 text-success display-1">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h2 class="playfair fw-bold mb-3">Taklifnomangiz tayyor!</h2>
+                <p class="text-muted mb-4">
+                    Quyidagi havolani nusxalab, mehmonlarga yuborishingiz mumkin. Har bir mehmon shu havola orqali bayramona sahifaga kiradi.
+                </p>
+
+                <div class="input-group mb-4 shadow-sm">
+                    <input type="text" id="invitationUrl" class="form-control form-control-lg bg-light text-center" value="{{ invitation_url }}" readonly>
+                    <button class="btn btn-primary px-4 fw-semibold" type="button" onclick="copyLink()">
+                        <i class="fa-solid fa-copy me-1"></i> Nusxalash
+                    </button>
+                </div>
+
+                <div id="copyAlert" class="alert alert-success d-none py-2 mb-4" role="alert">
+                    Havola nusxalandi!
+                </div>
+
+                <!-- QR Code generator -->
+                <div class="mb-4">
+                    <p class="small text-muted fw-semibold mb-2">QR Kod (Kamerada skaner qilish uchun):</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data={{ invitation_url }}" alt="QR Code" class="rounded shadow-sm p-2 bg-white border" style="width: 130px; height: 130px;">
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'invitation_detail' invitation.pk %}" target="_blank" class="btn btn-outline-primary btn-lg px-4">
+                        <i class="fa-solid fa-eye me-2"></i> Ko'rish
+                    </a>
+                    <a href="{% url 'home' %}" class="btn btn-dark btn-lg px-4">
+                        <i class="fa-solid fa-house me-2"></i> Bosh sahifa
+                    </a>
+                </div>
+                <a href="{% url 'my_invitations' %}" class="btn btn-link mt-3">
+                    <i class="fa-solid fa-folder-open me-1"></i>Mening taklifnomalarim
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function copyLink() {
+    var copyText = document.getElementById("invitationUrl");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+    
+    var alertBox = document.getElementById("copyAlert");
+    alertBox.classList.remove("d-none");
+    setTimeout(function() {
+        alertBox.classList.add("d-none");
+    }, 3000);
+}
+</script>
+{% endblock %}
+
+{% endblock %}

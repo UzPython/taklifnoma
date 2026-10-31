@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+
+{% block title %}Mening taklifnomalarim - Taklifnoma.uz{% endblock %}
+
+{% block extra_head %}
+<style>
+    .invitation-dashboard {
+        max-width: 1180px;
+    }
+    .dashboard-hero {
+        position: relative;
+        overflow: hidden;
+        color: #fff;
+        border-radius: 28px;
+        padding: clamp(28px, 5vw, 56px);
+        background:
+            radial-gradient(circle at 88% 16%, rgba(245, 211, 146, 0.3), transparent 16rem),
+            linear-gradient(125deg, #171722 0%, #292232 56%, #4a3041 100%);
+        box-shadow: 0 24px 60px rgba(27, 24, 35, 0.2);
+    }
+    .dashboard-hero::after {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        right: -90px;
+        bottom: -155px;
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 50%;
+        box-shadow: 0 0 0 24px rgba(255,255,255,0.035), 0 0 0 50px rgba(255,255,255,0.025);
+        pointer-events: none;
+    }
+    .dashboard-kicker {
+        color: #e8c982;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+    .dashboard-hero h1 {
+        max-width: 620px;
+        font-size: clamp(2.1rem, 5vw, 3.4rem);
+        line-height: 1.08;
+    }
+    .dashboard-hero .lead {
+        max-width: 590px;
+        color: rgba(255,255,255,0.72);
+        font-size: 1rem;
+        line-height: 1.8;
+    }
+    .dashboard-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 15px;
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 999px;
+        background: rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.88rem;
+    }
+    .dashboard-count strong {
+        color: #f0d28e;
+        font-size: 1.05rem;
+    }
+    .dashboard-hero .btn-create {
+        color: #2c2111;
+        background: linear-gradient(135deg, #f1d89e, #c99a45);
+        border: 0;
+        box-shadow: 0 10px 25px rgba(201,154,69,0.22);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .dashboard-hero .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(201,154,69,0.32);
+    }
+    .privacy-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 17px 20px;
+        color: var(--text-color);
+        background: rgba(201,154,69,0.1);
+        border: 1px solid rgba(201,154,69,0.2);
+        border-radius: 18px;
+    }
+    .privacy-note-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+        color: #a77a2e;
+        background: rgba(201,154,69,0.16);
+        border-radius: 12px;
+    }
+    [data-bs-theme="dark"] .privacy-note-icon {
+        color: #f1d89e;
+    }
+    .invitation-card {
+        overflow: hidden;
+        border: 1px solid rgba(120,120,130,0.12) !important;
+        border-radius: 22px;
+        box-shadow: 0 12px 30px rgba(20,20,30,0.06);
+    }
+    .invitation-card:hover {
+        box-shadow: 0 20px 42px rgba(20,20,30,0.12);
+    }
+    .invitation-cover {
+        position: relative;
+        display: flex;
+        min-height: 160px;
+        align-items: flex-end;
+        padding: 20px;
+        overflow: hidden;
+        color: #fff;
+        background:
+            radial-gradient(circle at 78% 12%, rgba(255,255,255,0.38), transparent 6rem),
+            linear-gradient(135deg, #746044, #c9a76b 55%, #ead7ad);
+    }
+    .invitation-cover.royal {
+        background: radial-gradient(circle at 78% 12%, rgba(255,255,255,0.22), transparent 6rem), linear-gradient(135deg, #11131b, #34303a 58%, #79613f);
+    }
+    .invitation-cover.rose {
+        background: radial-gradient(circle at 78% 12%, rgba(255,255,255,0.48), transparent 6rem), linear-gradient(135deg, #a54f62, #d98b91 58%, #f0c9bd);
+    }
+    .invitation-cover.video {
+        background: radial-gradient(circle at 78% 12%, rgba(255,255,255,0.3), transparent 6rem), linear-gradient(135deg, #354d73, #6479a1 58%, #a9b5cb);
+    }
+    .invitation-cover.has-image {
+        background-size: cover;
+        background-position: center;
+    }
+    .cover-decoration {
+        position: absolute;
+        top: 16px;
+        right: 20px;
+        font-size: 3.4rem;
+        opacity: 0.2;
+        transform: rotate(12deg);
+    }
+    .cover-caption {
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+    .cover-caption small {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.85;
+    }
+    .invitation-card .card-body {
+        padding: 22px;
+    }
+    .invitation-meta {
+        color: #858795;
+        font-size: 0.84rem;
+        line-height: 1.65;
+    }
+    [data-bs-theme="dark"] .invitation-meta {
+        color: #a8adba;
+    }
+    .invitation-action {
+        transition: transform 0.18s ease;
+    }
+    .invitation-action:hover {
+        transform: translateY(-1px);
+    }
+    .empty-state {
+        max-width: 700px;
+        margin: 20px auto 0;
+        padding: clamp(32px, 6vw, 64px) 24px;
+        border: 1px solid rgba(120,120,130,0.12);
+        border-radius: 26px;
+        background: var(--card-bg);
+        box-shadow: 0 18px 48px rgba(20,20,30,0.07);
+    }
+    .empty-state-icon {
+        display: grid;
+        place-items: center;
+        width: 82px;
+        height: 82px;
+        margin: 0 auto 22px;
+        color: #b38743;
+        background: rgba(201,154,69,0.13);
+        border-radius: 26px;
+        font-size: 2rem;
+        transform: rotate(-5deg);
+    }
+    @media (max-width: 575.98px) {
+        .invitation-dashboard {
+            padding-top: 24px !important;
+        }
+        .dashboard-hero {
+            border-radius: 22px;
+        }
+        .dashboard-hero h1 {
+            font-size: clamp(1.8rem, 7.5vw, 2.25rem);
+            overflow-wrap: anywhere;
+        }
+        .dashboard-hero .btn-create {
+            width: 100%;
+        }
+        .invitation-cover {
+            min-height: 135px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container invitation-dashboard py-5">
+    <section class="dashboard-hero mb-4">
+        <div class="row align-items-center g-4 position-relative" style="z-index: 1;">
+            <div class="col-lg-8">
+                <div class="dashboard-kicker mb-3"><i class="fa-solid fa-sparkles me-2"></i>Shaxsiy kabinet</div>
+                <h1 class="fw-bold mb-3">Bayramingizga atalgan taklifnomalar</h1>
+                <p class="lead mb-4">Barcha taklifnomalaringiz bir joyda. Havolani mehmonlarga yuboring va javoblarni shu sahifadan kuzating.</p>
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <a href="{% url 'create_invitation' %}" class="btn btn-create btn-lg rounded-pill fw-bold px-4 py-3">
+                        <i class="fa-solid fa-plus me-2"></i>Yangi taklifnoma yaratish
+                    </a>
+                    <span class="dashboard-count"><i class="fa-solid fa-envelope-open-text"></i><strong>{{ invitations|length }}</strong> ta taklifnoma</span>
+                </div>
+            </div>
+            <div class="col-lg-4 d-none d-lg-flex justify-content-center">
+                <div class="text-center" aria-hidden="true">
+                    <div class="display-1 mb-2" style="color: #efd59d;"><i class="fa-solid fa-envelope-open-text"></i></div>
+                    <div class="small text-white-50">Sizning chiroyli kunlaringiz</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="privacy-note mb-5">
+        <div class="privacy-note-icon"><i class="fa-solid fa-lock"></i></div>
+        <div>
+            <div class="fw-bold mb-1">Taklifnomalaringiz maxfiy</div>
+            <div class="small opacity-75">Bu ro‘yxat faqat shu brauzerda ko‘rinadi. Mehmonlaringiz taklifnomani faqat siz ulashgan havola orqali ochadi.</div>
+        </div>
+    </div>
+
+    {% if invitations %}
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-end gap-2 mb-4">
+        <div>
+            <div class="dashboard-kicker text-warning mb-2">Sizning kolleksiyangiz</div>
+            <h2 class="playfair fw-bold mb-0">Taklifnomalarim</h2>
+        </div>
+        <span class="small text-muted">Eng yangilari birinchi ko‘rsatiladi</span>
+    </div>
+    <div class="row g-4">
+        {% for invitation in invitations %}
+        <div class="col-md-6 col-xl-4">
+            <article class="card invitation-card h-100">
+                <div class="invitation-cover {{ invitation.template_style }} {% if invitation.cover_image %}has-image{% endif %}" {% if invitation.cover_image %}style="background-image: linear-gradient(0deg, rgba(0,0,0,.62), rgba(0,0,0,.06)), url('{{ invitation.cover_image.url }}');"{% endif %}>
+                    <div class="cover-decoration"><i class="fa-solid fa-sparkles"></i></div>
+                    <div class="cover-caption">
+                        <small>{{ invitation.get_event_type_display }}</small>
+                        <div class="h4 playfair fw-bold mb-0">{{ invitation.hosts }}</div>
+                    </div>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                        <div>
+                            <h3 class="h5 fw-bold mb-1">{{ invitation.title }}</h3>
+                            <span class="small text-muted">Yaratildi: {{ invitation.created_at|date:"d.m.Y" }}</span>
+                        </div>
+                        <span class="badge rounded-pill text-bg-light border px-3 py-2"><i class="fa-solid fa-heart text-danger me-1"></i>{{ invitation.likes_count }}</span>
+                    </div>
+                    <div class="invitation-meta mb-4">
+                        <div class="mb-2"><i class="fa-regular fa-calendar me-2 text-warning"></i>{{ invitation.event_datetime|date:"d.m.Y, H:i" }}</div>
+                        <div><i class="fa-solid fa-location-dot me-2 text-warning"></i>{{ invitation.venue_name }}</div>
+                    </div>
+                    <div class="mt-auto d-grid gap-2">
+                        <a href="{% url 'invitation_detail' invitation.pk %}" class="btn btn-dark rounded-pill py-2 invitation-action">
+                            <i class="fa-regular fa-eye me-2"></i>Taklifnomani ko‘rish
+                        </a>
+                        <button type="button" class="btn btn-outline-primary rounded-pill py-2 invitation-action copy-invitation-link"
+                                data-invitation-url="{{ request.scheme }}://{{ request.get_host }}{% url 'invitation_detail' invitation.pk %}">
+                            <i class="fa-solid fa-link me-2"></i>Havolani nusxalash
+                        </button>
+                        <form method="POST" action="{% url 'delete_invitation' invitation.pk %}" onsubmit="return confirm('Haqiqatan ham bu taklifnomani o\'chirib tashlamoqchimisiz?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link btn-sm text-danger text-decoration-none w-100">
+                                <i class="fa-regular fa-trash-can me-1"></i>Taklifnomani o‘chirish
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <section class="empty-state text-center">
+        <div class="empty-state-icon"><i class="fa-regular fa-envelope"></i></div>
+        <div class="dashboard-kicker text-warning mb-2">Hali boshlanishi oldinda</div>
+        <h2 class="playfair fw-bold mb-2">Birinchi taklifnomangizni yarating</h2>
+        <p class="text-muted mx-auto mb-4" style="max-width: 430px;">Tadbir ma’lumotlarini kiriting, dizayn tanlang va tayyor havolani mehmonlaringizga yuboring.</p>
+        <a href="{% url 'create_invitation' %}" class="btn btn-dark rounded-pill px-4 py-3 fw-semibold">
+            <i class="fa-solid fa-wand-magic-sparkles me-2 text-warning"></i>Taklifnoma yaratish
+        </a>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.copy-invitation-link').forEach((button) => {
+    button.addEventListener('click', async () => {
+        const url = button.dataset.invitationUrl;
+        try {
+            await navigator.clipboard.writeText(url);
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fa-solid fa-check me-2"></i>Havola nusxalandi';
+            setTimeout(() => { button.innerHTML = originalText; }, 2000);
+        } catch (error) {
+            window.prompt('Taklifnoma havolasini nusxalang:', url);
+        }
+    });
+});
+</script>
+{% endblock %}

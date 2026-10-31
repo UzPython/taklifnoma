@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Taklifnoma shablonlari - Taklifnoma.uz{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-semibold mb-2">
+            <i class="fa-solid fa-gem me-1"></i> Eksklyuziv Kolleksiya
+        </span>
+        <h1 class="playfair fw-bold display-5 mb-3">Taklifnoma shablonlari</h1>
+        <p class="text-muted col-lg-7 mx-auto lead fs-6">
+            To'y va tantanali tadbirlaringiz uchun o'zingizga yoqqan shablonni tanlang va bepul yarating. Ochilish animatsiyasi, fon musiqasi, lokatsiya va RSVP xususiyatlari birikkan.
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Template 1: The Sacred Garden -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden template-card">
+                <div class="template-mockup bg-light p-4 text-center position-relative" style="background: linear-gradient(135deg, #fdfbf7 0%, #e2d9c5 100%); min-height: 320px; display: flex; align-items: center; justify-content: center;">
+                    <div class="phone-frame shadow-lg bg-white rounded-5 p-2 border border-4 border-dark" style="width: 170px; height: 280px; position: relative;">
+                        <div class="notch bg-dark rounded-pill mx-auto mb-2" style="width: 60px; height: 12px;"></div>
+                        <div class="screen bg-white rounded-4 p-3 d-flex flex-column justify-content-between h-85 text-center" style="background: radial-gradient(circle, #fff 0%, #f4efe6 100%);">
+                            <div class="small fw-bold text-uppercase" style="font-size: 0.6rem; color: #b8860b;">Nikoh To'yi</div>
+                            <div class="playfair fst-italic fw-bold text-dark" style="font-size: 0.85rem;">The Sacred Garden</div>
+                            <div class="badge bg-danger text-white rounded-pill p-1 mx-auto" style="font-size: 0.5rem;"><i class="fa-solid fa-stamp"></i> Vaqti keldi</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <h3 class="h5 fw-bold playfair mb-2">The Sacred Garden</h3>
+                        <p class="text-muted small mb-3">Klassik oqshom va tabiat naqshlari uyg'unlashgan nafis qog'oz dizayn.</p>
+                    </div>
+                    <a href="{% url 'create_invitation' %}?style=paper" class="btn btn-outline-dark btn-sm fw-bold rounded-pill py-2 d-flex justify-content-between align-items-center px-3">
+                        <span>Onlayn-taklifnoma</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Template 2: Italian Villa -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden template-card">
+                <div class="template-mockup bg-light p-4 text-center position-relative" style="background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%); min-height: 320px; display: flex; align-items: center; justify-content: center;">
+                    <div class="phone-frame shadow-lg bg-white rounded-5 p-2 border border-4 border-dark" style="width: 170px; height: 280px; position: relative;">
+                        <div class="notch bg-dark rounded-pill mx-auto mb-2" style="width: 60px; height: 12px;"></div>
+                        <div class="screen bg-white rounded-4 p-3 d-flex flex-column justify-content-between h-85 text-center" style="background: radial-gradient(circle, #fff 0%, #e0f2fe 100%);">
+                            <div class="small fw-bold text-uppercase" style="font-size: 0.6rem; color: #0284c7;">Fotiha To'yi</div>
+                            <div class="playfair fst-italic fw-bold text-dark" style="font-size: 0.85rem;">Italian Villa</div>
+                            <div class="badge bg-primary text-white rounded-pill p-1 mx-auto" style="font-size: 0.5rem;"><i class="fa-solid fa-ring"></i> Sevgi va hurmat</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <h3 class="h5 fw-bold playfair mb-2">Italian Villa</h3>
+                        <p class="text-muted small mb-3">Moviy va oq ranglardagi sovuq, zamonaviy va yengil dizayn uslubi.</p>
+                    </div>
+                    <a href="{% url 'create_invitation' %}?style=rose" class="btn btn-outline-dark btn-sm fw-bold rounded-pill py-2 d-flex justify-content-between align-items-center px-3">
+                        <span>Onlayn-taklifnoma</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Template 3: Royal Night -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden template-card">
+                <div class="template-mockup bg-light p-4 text-center position-relative" style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%); min-height: 320px; display: flex; align-items: center; justify-content: center;">
+                    <div class="phone-frame shadow-lg bg-dark rounded-5 p-2 border border-4 border-warning" style="width: 170px; height: 280px; position: relative;">
+                        <div class="notch bg-secondary rounded-pill mx-auto mb-2" style="width: 60px; height: 12px;"></div>
+                        <div class="screen rounded-4 p-3 d-flex flex-column justify-content-between h-85 text-center text-white" style="background: #0b0f19;">
+                            <div class="small fw-bold text-uppercase text-warning" style="font-size: 0.6rem;">Qirollik Kechasi</div>
+                            <div class="playfair fst-italic fw-bold text-warning" style="font-size: 0.85rem;">Royal Night</div>
+                            <div class="badge bg-warning text-dark rounded-pill p-1 mx-auto" style="font-size: 0.5rem;"><i class="fa-solid fa-crown"></i> Oltin bezak</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <h3 class="h5 fw-bold playfair mb-2">Royal Night</h3>
+                        <p class="text-muted small mb-3">To'q qora va oltin rangli hashamatli kechalar uchun eng mukammal tanlov.</p>
+                    </div>
+                    <a href="{% url 'create_invitation' %}?style=royal" class="btn btn-outline-dark btn-sm fw-bold rounded-pill py-2 d-flex justify-content-between align-items-center px-3">
+                        <span>Onlayn-taklifnoma</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Template 4: Ruby Elegance -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden template-card">
+                <div class="template-mockup bg-light p-4 text-center position-relative" style="background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); min-height: 320px; display: flex; align-items: center; justify-content: center;">
+                    <div class="phone-frame shadow-lg bg-white rounded-5 p-2 border border-4 border-danger" style="width: 170px; height: 280px; position: relative;">
+                        <div class="notch bg-dark rounded-pill mx-auto mb-2" style="width: 60px; height: 12px;"></div>
+                        <div class="screen rounded-4 p-3 d-flex flex-column justify-content-between h-85 text-center" style="background: radial-gradient(circle, #fff 0%, #ffe4e6 100%);">
+                            <div class="small fw-bold text-uppercase text-danger" style="font-size: 0.6rem;">Nozik Atirgul</div>
+                            <div class="playfair fst-italic fw-bold text-danger" style="font-size: 0.85rem;">Ruby Elegance</div>
+                            <div class="badge bg-danger text-white rounded-pill p-1 mx-auto" style="font-size: 0.5rem;"><i class="fa-solid fa-heart"></i> Sevgi ramzi</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <h3 class="h5 fw-bold playfair mb-2">Ruby Elegance</h3>
+                        <p class="text-muted small mb-3">Pushti va qizil atirgul naqshlari bilan bezatilgan iliq va romantik dizayn.</p>
+                    </div>
+                    <a href="{% url 'create_invitation' %}?style=rose" class="btn btn-outline-dark btn-sm fw-bold rounded-pill py-2 d-flex justify-content-between align-items-center px-3">
+                        <span>Onlayn-taklifnoma</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .template-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .template-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.15) !important;
+    }
+</style>
+{% endblock %}

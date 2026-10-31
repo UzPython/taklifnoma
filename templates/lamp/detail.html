@@ -1,0 +1,455 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ invitation.title }} - Taklifnoma{% endblock %}
+
+{% block extra_head %}
+<!-- Confetti JS -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+    body {
+        {% if invitation.template_style == 'royal' %}
+        background-color: #0b0f19;
+        color: #f3f4f6;
+        {% elif invitation.template_style == 'rose' %}
+        background-color: #fff1f2;
+        color: #4c0519;
+        {% else %}
+        background-color: #1a1a1a;
+        color: #333;
+        {% endif %}
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .arch-card {
+        background-color: {% if invitation.cover_image %}transparent{% else %}
+            {% if invitation.template_style == 'royal' %}#111827
+            {% elif invitation.template_style == 'rose' %}#fffbeb
+            {% else %}#f4efe6{% endif %}
+        {% endif %};
+        {% if invitation.cover_image %}
+        background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)), url("{{ invitation.cover_image.url }}");
+        background-size: cover;
+        background-position: center;
+        color: #ffffff;
+        {% else %}
+        color: {% if invitation.template_style == 'royal' %}#f3f4f6{% else %}#2c3e50{% endif %};
+        {% endif %}
+        border-top-left-radius: 200px;
+        border-top-right-radius: 200px;
+        border-bottom-left-radius: 24px;
+        border-bottom-right-radius: 24px;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 25px rgba(212,175,55,0.25);
+        border: 4px solid {% if invitation.template_style == 'royal' %}#fbbf24{% elif invitation.template_style == 'rose' %}#fb7185{% else %}#d4af37{% endif %};
+        overflow: hidden;
+        position: relative;
+        padding: 60px 35px;
+        max-width: 680px;
+        margin: 0 auto;
+    }
+    .arch-header {
+        text-align: center;
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+    .arch-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    .couple-names {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-style: italic;
+        color: {% if invitation.cover_image %}#fbbf24{% elif invitation.template_style == 'royal' %}#fbbf24{% elif invitation.template_style == 'rose' %}#e11d48{% else %}#b8860b{% endif %};
+        margin: 20px 0;
+        line-height: 1.2;
+    }
+    .floral-ornament {
+        font-size: 1.5rem;
+        letter-spacing: 10px;
+        color: {% if invitation.template_style == 'royal' %}#fbbf24{% elif invitation.template_style == 'rose' %}#fb7185{% else %}#d4af37{% endif %};
+        margin: 15px 0;
+    }
+    .music-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        background: {% if invitation.template_style == 'royal' %}#fbbf24{% elif invitation.template_style == 'rose' %}#e11d48{% else %}#d4af37{% endif %};
+        color: {% if invitation.template_style == 'royal' %}#000{% else %}#fff{% endif %};
+        border: none;
+        border-radius: 50px;
+        padding: 12px 20px;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .countdown-box {
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(8px);
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: 35px;
+        border: 1px solid rgba(212, 175, 55, 0.5);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .countdown-item {
+        font-size: 1.8rem;
+        font-weight: bold;
+        font-family: 'Playfair Display', serif;
+        color: {% if invitation.template_style == 'royal' %}#fbbf24{% elif invitation.template_style == 'rose' %}#fb7185{% else %}#d4af37{% endif %};
+    }
+    .countdown-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .wish-card {
+        background: rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 12px;
+        text-align: left;
+        backdrop-filter: blur(5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Background Music Audio element -->
+    {% if invitation.audio_file %}
+    <audio id="bgAudio" loop>
+        <source src="{{ invitation.audio_file.url }}" type="audio/mpeg">
+    </audio>
+    <button class="music-btn" id="musicToggle" onclick="toggleMusic()">
+        <i class="fa-solid fa-music" id="musicIcon"></i> <span id="musicText">Musiqani yoqish</span>
+    </button>
+    {% endif %}
+
+    <div class="arch-card text-center">
+        <!-- Top Badge -->
+        <div class="mb-3">
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-semibold text-uppercase shadow-sm">
+                <i class="fa-solid fa-champagne-glasses me-1"></i> {{ invitation.get_event_display }}
+            </span>
+        </div>
+
+        <!-- Warning Alert if < 24 hours remaining -->
+        <div id="eventWarning" class="alert alert-danger d-none shadow-sm mb-4 py-2 fw-semibold border-0 text-dark bg-warning bg-opacity-75">
+            <i class="fa-solid fa-triangle-exclamation me-1"></i> Diqqat! Tadbirga 24 soatdan kam vaqt qoldi!
+        </div>
+
+        <div class="text-uppercase tracking-widest small opacity-75 mb-2">Aziz mehmon sizni</div>
+        
+        <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-3">
+            <form method="post" action="{% url 'like_invitation' invitation.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold">
+                    <i class="fa-solid fa-heart me-1 text-danger"></i> Yoqdi ({{ invitation.likes_count }})
+                </button>
+            </form>
+            <span class="badge bg-light text-dark rounded-pill px-3 py-2">
+                <i class="fa-solid fa-users me-1"></i> {{ invitation.rsvps.count }} javob
+            </span>
+        </div>
+
+        <div class="arch-header">
+            <h1>{{ invitation.title }}</h1>
+            <div class="couple-names">{{ invitation.hosts }}</div>
+        </div>
+
+        <!-- Video Uploaded Player if exists -->
+        {% if invitation.video_file %}
+        <div class="my-4">
+            <video class="w-100 rounded-3 shadow" controls>
+                <source src="{{ invitation.video_file.url }}" type="video/mp4">
+                Sizning brauzeringiz videoni qo'llab-quvvatlamaydi.
+            </video>
+        </div>
+        {% endif %}
+
+        <p class="fs-6 px-3 mb-4" style="line-height: 1.8; font-family: 'Playfair Display', serif;">
+            {{ invitation.message|linebreaks }}
+        </p>
+
+        {% if invitation.guest_name %}
+        <div class="alert bg-warning text-dark border-0 fw-semibold py-3 mb-4 mx-auto w-75 rounded-4 shadow-sm">
+            <div class="small text-uppercase opacity-75 mb-1"><i class="fa-solid fa-user-group me-1"></i> Hurmatli mehmon(lar):</div>
+            {{ invitation.guest_name|linebreaksbr }}
+        </div>
+        {% endif %}
+
+        <div class="floral-ornament">❀ ❦ ❀</div>
+
+        <!-- Date & Venue -->
+        <div class="my-4 row g-3 justify-content-center text-start px-2">
+            <div class="col-12 bg-black bg-opacity-25 p-3 rounded-3 border border-warning border-opacity-25">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fa-solid fa-calendar-days text-warning fs-4 me-3"></i>
+                    <div>
+                        <div class="small opacity-75">Sana va vaqt</div>
+                        <div class="fw-bold">{{ invitation.event_datetime|date:"d.m.Y H:i" }}</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fa-solid fa-location-dot text-danger fs-4 me-3"></i>
+                    <div>
+                        <div class="small opacity-75">{{ invitation.venue_name }}</div>
+                        <div class="fw-bold small">{{ invitation.venue_address }}</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons: Map & Calendar -->
+                <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top border-secondary border-opacity-25">
+                    <a href="https://maps.google.com/?q={{ invitation.venue_name|urlencode }} {{ invitation.venue_address|urlencode }}" target="_blank" class="btn btn-outline-light btn-sm flex-fill">
+                        <i class="fa-solid fa-map-location-dot me-1 text-danger"></i> Lokatsiyani ochish
+                    </a>
+                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ invitation.title|urlencode }}&details={{ invitation.message|urlencode }}&location={{ invitation.venue_name|urlencode }}, {{ invitation.venue_address|urlencode }}" target="_blank" class="btn btn-outline-light btn-sm flex-fill">
+                        <i class="fa-solid fa-calendar-plus me-1 text-warning"></i> Kalendarga qo'shish
+                    </a>
+                </div>
+                <div class="mt-3 pt-2 border-top border-secondary border-opacity-25 text-start">
+                    <label class="form-label small fw-semibold text-warning mb-1">
+                        <i class="fa-solid fa-bell me-1"></i> Eslatma vaqtini tanlang (Qancha oldin xabar beraylik?):
+                    </label>
+                    <div class="input-group input-group-sm">
+                        <select id="userReminderMinutes" class="form-select form-select-sm bg-dark text-white border-warning">
+                            <option value="1">1 minut oldin</option>
+                            <option value="5">5 minut oldin</option>
+                            <option value="30">30 minut oldin</option>
+                            <option value="60">1 soat oldin</option>
+                            <option value="180">3 soat oldin</option>
+                            <option value="360">6 soat oldin</option>
+                            <option value="720">12 soat oldin</option>
+                            <option value="1440" selected>24 soat (1 kun) oldin</option>
+                            <option value="2880">48 soat (2 kun) oldin</option>
+                            <option value="4320">72 soat (3 kun) oldin</option>
+                        </select>
+                        <button class="btn btn-warning btn-sm text-dark fw-bold px-3" onclick="enableCustomPushReminder()">
+                            Yoqish
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Countdown -->
+        <div class="countdown-box">
+            <div class="small text-uppercase fw-semibold mb-2 opacity-75">Tadbirgacha qolgan vaqt</div>
+            <div class="row text-center" id="countdown">
+                <div class="col-3">
+                    <div class="countdown-item" id="days">00</div>
+                    <div class="countdown-label">Kun</div>
+                </div>
+                <div class="col-3">
+                    <div class="countdown-item" id="hours">00</div>
+                    <div class="countdown-label">Soat</div>
+                </div>
+                <div class="col-3">
+                    <div class="countdown-item" id="minutes">00</div>
+                    <div class="countdown-label">Daqiqa</div>
+                </div>
+                <div class="col-3">
+                    <div class="countdown-item" id="seconds">00</div>
+                    <div class="countdown-label">Soniya</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 small fst-italic opacity-75">
+            Tashrifingiz biz uchun behad quvonchli!
+        </div>
+
+        <!-- QR Code for quick mobile access -->
+        <div class="mt-3 p-3 bg-black bg-opacity-25 rounded-3 border border-warning border-opacity-25 d-inline-block">
+            <div class="small fw-semibold mb-2 text-warning">📲 QR Kod orqali ochish:</div>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data={{ request.build_absolute_uri }}" alt="QR Code" class="rounded shadow-sm bg-white p-1" style="width: 100px; height: 100px;">
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0 rounded-4 p-4 bg-white text-dark">
+                <h5 class="fw-bold mb-3 text-center"><i class="fa-solid fa-chart-column me-2 text-primary"></i> Mehmonlar statistikasi</h5>
+                <div class="row g-3 text-center">
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3 bg-success-subtle">
+                            <div class="fw-bold text-success fs-4">{{ invitation.yes_rsvp_count }}</div>
+                            <div class="small text-success">Keladi</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3 bg-warning-subtle">
+                            <div class="fw-bold text-warning fs-4">{{ invitation.maybe_rsvp_count }}</div>
+                            <div class="small text-warning">Balki keladi</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3 bg-danger-subtle">
+                            <div class="fw-bold text-danger fs-4">{{ invitation.no_rsvp_count }}</div>
+                            <div class="small text-danger">Kela olmaydi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RSVP & Guest Wishes Section -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-7">
+            <div class="card shadow-lg border-0 rounded-4 p-4 p-md-4 bg-white text-dark">
+                <h3 class="playfair fw-bold text-center mb-3">Kelishingizni tasdiqlang va Tabrik yozing</h3>
+                <p class="text-muted text-center small mb-4">Tadbirda ishtirok etishingiz haqida xabar bering va o'z tilaklaringizni qoldiring.</p>
+
+                <form method="POST" class="mb-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ rsvp_form.guest_name.label }}</label>
+                        {{ rsvp_form.guest_name }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ rsvp_form.attendance.label }}</label>
+                        {{ rsvp_form.attendance }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ rsvp_form.wish_message.label }}</label>
+                        {{ rsvp_form.wish_message }}
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning fw-bold py-2 text-dark shadow-sm">
+                            <i class="fa-solid fa-paper-plane me-1"></i> Javobni yuborish
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="my-4">
+
+                <h5 class="fw-bold mb-3 text-center"><i class="fa-solid fa-comments text-warning me-2"></i> Mehmonlarning tabriklari va javoblari ({{ rsvps.count }})</h5>
+                
+                <div class="wish-list" style="max-height: 350px; overflow-y: auto;">
+                    {% if rsvps %}
+                        {% for rsvp in rsvps %}
+                        <div class="wish-card border">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-primary">{{ rsvp.guest_name }}</span>
+                                <span class="badge {% if rsvp.attendance == 'yes' %}bg-success{% elif rsvp.attendance == 'maybe' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                    {{ rsvp.get_attendance_display }}
+                                </span>
+                            </div>
+                            {% if rsvp.wish_message %}
+                            <p class="mb-1 small text-muted">{{ rsvp.wish_message }}</p>
+                            {% endif %}
+                            <div class="text-end" style="font-size: 0.7rem; color: #aaa;">{{ rsvp.created_at|date:"d.m.Y H:i" }}</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-center text-muted small py-3">Hozircha javoblar yo'q. Birinchi bo'lib tabrik yo'llang!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Trigger celebratory confetti on load
+    window.addEventListener('DOMContentLoaded', (event) => {
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+    });
+
+    const eventDate = new Date("{{ invitation.event_datetime|date:'Y-m-d H:i:s' }}").getTime();
+    let customReminderMillis = 24 * 60 * 60 * 1000;
+    let notificationTriggered = false;
+
+    function enableCustomPushReminder() {
+        const selectEl = document.getElementById("userReminderMinutes");
+        const chosenMinutes = parseInt(selectEl.value) || 1440;
+        customReminderMillis = chosenMinutes * 60 * 1000;
+
+        if (!("Notification" in window)) {
+            alert("Sizning qurilmangiz yoki brauzeringiz bildirishnomalarni qo'llab-quvvatlamaydi.");
+            return;
+        }
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                const timeText = chosenMinutes < 60 ? chosenMinutes + " minut" : (chosenMinutes / 60) + " soat";
+                alert(`Eslatmalar muvaffaqiyatli yoqildi! Tadbirdan ${timeText} oldin telefon yoki PC'ingizga bildirishnoma keladi.`);
+                new Notification("Taklifnoma Eslatmasi Faollashdi 🎉", {
+                    body: "{{ invitation.title }} uchun eslatma o'rnatildi (" + timeText + " oldin)."
+                });
+            } else {
+                alert("Bildirishnoma uchun ruxsat berilmadi.");
+            }
+        });
+    }
+
+    const timer = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = eventDate - now;
+
+        if (distance < 0) {
+            clearInterval(timer);
+            document.getElementById("countdown").innerHTML = "<div class='col-12 text-success fw-bold'>Tadbir boshlandi!</div>";
+            const warningEl = document.getElementById("eventWarning");
+            if (warningEl) warningEl.classList.add("d-none");
+            return;
+        }
+
+        // Check custom reminder threshold
+        if (distance <= customReminderMillis && distance > 0 && !notificationTriggered) {
+            notificationTriggered = true;
+            const warningEl = document.getElementById("eventWarning");
+            if (warningEl) {
+                warningEl.classList.remove("d-none");
+                warningEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> Diqqat! Tadbir vaqti yaqinlashmoqda!`;
+            }
+            if (Notification.permission === "granted") {
+                new Notification("⏰ Tadbir vaqti yaqinlashmoqda!", {
+                    body: "{{ invitation.title }} - {{ invitation.venue_name }}. Eslatma vaqti keldi!"
+                });
+            }
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("days").innerText = String(days).padStart(2, '0');
+        document.getElementById("hours").innerText = String(hours).padStart(2, '0');
+        document.getElementById("minutes").innerText = String(minutes).padStart(2, '0');
+        document.getElementById("seconds").innerText = String(seconds).padStart(2, '0');
+    }, 1000);
+
+    function toggleMusic() {
+        const audio = document.getElementById("bgAudio");
+        const icon = document.getElementById("musicIcon");
+        const text = document.getElementById("musicText");
+
+        if (audio.paused) {
+            audio.play();
+            icon.className = "fa-solid fa-pause";
+            text.innerText = "Musiqani to'xtatish";
+        } else {
+            audio.pause();
+            icon.className = "fa-solid fa-music";
+            text.innerText = "Musiqani yoqish";
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="uz" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}To'y va Tadbir Taklifnomalari{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f5f4f1;
+            --text-color: #20212b;
+            --card-bg: #ffffff;
+            --nav-bg: #11121a;
+            --accent: #c99a45;
+        }
+        [data-bs-theme="dark"] {
+            --bg-color: #0d1018;
+            --text-color: #f3f4f6;
+            --card-bg: #151a25;
+            --nav-bg: #090b11;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background:
+                radial-gradient(ellipse at 10% 0%, rgba(201, 154, 69, 0.08), transparent 34rem),
+                var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        main {
+            flex: 1;
+        }
+        h1, h2, h3, .playfair {
+            font-family: 'Playfair Display', serif;
+        }
+        .navbar {
+            background: linear-gradient(110deg, #10121a, #1a1b24 58%, #222027) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            transition: background 0.3s ease;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .navbar-brand i {
+            color: var(--accent);
+        }
+        .navbar .nav-link {
+            border-radius: 999px;
+            transition: color 0.2s ease, background-color 0.2s ease;
+        }
+        .navbar .nav-link:hover,
+        .navbar .nav-link.active {
+            color: #fff !important;
+            background: rgba(255,255,255,0.1);
+        }
+        .navbar .btn-warning {
+            background: linear-gradient(135deg, #e6c27b, #c99a45);
+            border: 0;
+        }
+        .card {
+            background-color: var(--card-bg) !important;
+            color: var(--text-color) !important;
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+        }
+        footer {
+            background-color: var(--nav-bg);
+            color: #9ca3af;
+            padding: 28px 0;
+            margin-top: 48px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .theme-toggle-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            border-radius: 50px;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .theme-toggle-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm py-3">
+        <div class="container">
+            <a class="navbar-brand text-warning fs-4" href="{% url 'home' %}">
+                <i class="fa-solid fa-envelope-open-text me-2"></i>Taklifnoma.uz
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Rejimni o'zgartirish">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i> <span class="d-none d-sm-inline" id="themeText">Qorong'i</span>
+                </button>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center mt-3 mt-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link px-3 {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Bosh sahifa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 {% if request.resolver_match.url_name == 'templates_list' %}active{% endif %}" href="{% url 'templates_list' %}">Shablonlar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 {% if request.resolver_match.url_name == 'my_invitations' %}active{% endif %}" href="{% url 'my_invitations' %}">Mening taklifnomalarim</a>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="btn btn-warning text-dark fw-bold px-4 py-2 shadow-sm" href="{% url 'create_invitation' %}">
+                            <i class="fa-solid fa-plus me-1"></i> Taklifnoma yaratish
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <p class="mb-1 fw-semibold">&copy; 2026 Taklifnoma.uz. Barcha huquqlar himoyalangan.</p>
+            <p class="small text-muted mb-0">To'y va tantanali tadbirlaringiz uchun zamonaviy elektron taklifnomalar va eslatmalar.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'fa-solid fa-sun';
+                if (text) text.innerText = 'Yorug\'';
+            } else {
+                if (icon) icon.className = 'fa-solid fa-moon';
+                if (text) text.innerText = 'Qorong\'i';
+            }
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-bs-theme');
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        }
+
+        // Initialize theme from storage
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
