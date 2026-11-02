@@ -152,7 +152,7 @@
         <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-3">
             <form method="post" action="{% url 'like_invitation' invitation.pk %}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold">
+                <button type="submit" class="btn {% if has_liked %}btn-light text-danger opacity-75{% else %}btn-outline-light{% endif %} rounded-pill px-3 py-2 fw-semibold" {% if has_liked %}disabled title="Siz allaqachon like bosgansiz"{% endif %}>
                     <i class="fa-solid fa-heart me-1 text-danger"></i> Yoqdi ({{ invitation.likes_count }})
                 </button>
             </form>

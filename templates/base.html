@@ -130,6 +130,22 @@
                             <i class="fa-solid fa-plus me-1"></i> Taklifnoma yaratish
                         </a>
                     </li>
+                    {% if request.user.is_authenticated %}
+                    <li class="nav-item dropdown ms-lg-2">
+                        <a class="nav-link dropdown-toggle text-warning px-3" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-user-circle me-1"></i> {{ request.user.first_name|default:request.user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fa-solid fa-right-from-bracket me-2"></i>Chiqish</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-outline-light px-3 py-2 rounded-pill" href="{% url 'login' %}">
+                            <i class="fa-brands fa-google me-1"></i> Kirish
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

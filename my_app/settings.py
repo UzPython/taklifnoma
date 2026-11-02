@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "lamp.middleware.AntiDDoSIPBanMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -129,3 +130,7 @@ MAILERS = {
         "BACKEND": "django.core.mail.backends.console.EmailBackend",
     },
 }
+
+TELEGRAM_BOT_TOKEN = "9006621096:AAHtvQW02yY-HJxKBvada3Oqs3bkPrifBmE"
+TELEGRAM_CHAT_ID = "8996538354"
+

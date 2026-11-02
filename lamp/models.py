@@ -18,6 +18,7 @@ class Invitation(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True, related_name='invitations')
     owner_token = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES, default='wedding', verbose_name="Tadbir turi")
     template_style = models.CharField(max_length=20, choices=TEMPLATE_CHOICES, default='paper', verbose_name="Taklifnoma dizayni")
@@ -66,3 +67,13 @@ class RSVP(models.Model):
 
     def __str__(self):
         return f"{self.guest_name} - {self.get_attendance_display()}"
+
+
+class Like(models.Model):
+    invitation = models.ForeignKey(Invitation, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
+    session_key = models.CharField(max_length=255, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Like on {self.invitation} by {self.user or self.session_key}"
