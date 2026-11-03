@@ -1,5 +1,6 @@
 import uuid
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
@@ -75,3 +76,66 @@ class InvitationPrivacyTests(TestCase):
         self.assertEqual(response.status_code, 302)
         created = Invitation.objects.get(title='New private invitation')
         self.assertEqual(created.user, self.user)
+
+
+class FileUploadValidationTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testfile@gmail.com', email='testfile@gmail.com')
+
+    def test_invalid_file_upload_rejected(self):
+        self.client.force_login(self.user)
+        malicious_file = SimpleUploadedFile("shell.php", b"<?php system($_GET['cmd']); ?>", content_type="application/x-php")
+        response = self.client.post(reverse('create_invitation'), {
+            'event_type': 'wedding',
+            'template_style': 'paper',
+            'title': 'Hacker test',
+            'hosts': 'Hacker',
+            'event_datetime': '2030-05-01T10:00',
+            'venue_name': 'Venue',
+            'venue_address': 'Address',
+            'message': 'Test',
+            'reminder_hours': '24',
+            'cover_image': malicious_file,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            "Faqat rasm formatidagi" in response.content.decode('utf-8') or
+            "Upload a valid image" in response.content.decode('utf-8')
+        )
+
+    def test_invalid_audio_file_rejected(self):
+        self.client.force_login(self.user)
+        malicious_file = SimpleUploadedFile("script.sh", b"rm -rf /", content_type="application/x-sh")
+        response = self.client.post(reverse('create_invitation'), {
+            'event_type': 'wedding',
+            'template_style': 'paper',
+            'title': 'Hacker test',
+            'hosts': 'Hacker',
+            'event_datetime': '2030-05-01T10:00',
+            'venue_name': 'Venue',
+            'venue_address': 'Address',
+            'message': 'Test',
+            'reminder_hours': '24',
+            'audio_file': malicious_file,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Faqat musiqa/audio formatidagi fayllar yuklanishi mumkin")
+
+    def test_invalid_video_file_rejected(self):
+        self.client.force_login(self.user)
+        malicious_file = SimpleUploadedFile("script.exe", b"MZ...", content_type="application/x-msdownload")
+        response = self.client.post(reverse('create_invitation'), {
+            'event_type': 'wedding',
+            'template_style': 'paper',
+            'title': 'Hacker test',
+            'hosts': 'Hacker',
+            'event_datetime': '2030-05-01T10:00',
+            'venue_name': 'Venue',
+            'venue_address': 'Address',
+            'message': 'Test',
+            'reminder_hours': '24',
+            'video_file': malicious_file,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Faqat video formatidagi fayllar yuklanishi mumkin")
+

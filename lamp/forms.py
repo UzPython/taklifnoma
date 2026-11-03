@@ -1,4 +1,7 @@
+import os
 from django import forms
+from django.core.exceptions import ValidationError
+from PIL import Image
 from .models import Invitation, RSVP
 
 class InvitationForm(forms.ModelForm):
@@ -29,11 +32,43 @@ class InvitationForm(forms.ModelForm):
             'venue_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Masalan: 'Oqsaroy' tantanalar saroyi"}),
             'venue_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': "Toshkent shahri, Yunusobod tumani..."}),
             'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': "Taklifnoma matnini kiriting..."}),
-            'cover_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'audio_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.mp3,audio/*'}),
-            'video_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.mp4,video/*'}),
+            'cover_image': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/jpeg,image/png,image/webp,image/gif'}),
+            'audio_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.mp3,.wav,.m4a,audio/*'}),
+            'video_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.mp4,video/mp4'}),
             'reminder_hours': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'max': '720', 'placeholder': 'Masalan: 24 (soat)'}),
         }
+
+    def clean_cover_image(self):
+        image = self.cleaned_data.get('cover_image')
+        if image:
+            ext = os.path.splitext(image.name)[1].lower()
+            valid_extensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif']
+            if ext not in valid_extensions:
+                raise ValidationError("Faqat rasm formatidagi fayllar yuklanishi mumkin (.jpg, .jpeg, .png, .webp, .gif).")
+            try:
+                img = Image.open(image)
+                img.verify()
+            except Exception:
+                raise ValidationError("Yuklangan fayl haqiqiy rasm emas.")
+        return image
+
+    def clean_audio_file(self):
+        audio = self.cleaned_data.get('audio_file')
+        if audio:
+            ext = os.path.splitext(audio.name)[1].lower()
+            valid_extensions = ['.mp3', '.wav', '.m4a', '.aac', '.ogg']
+            if ext not in valid_extensions:
+                raise ValidationError("Faqat musiqa/audio formatidagi fayllar yuklanishi mumkin (.mp3, .wav, .m4a, .aac, .ogg).")
+        return audio
+
+    def clean_video_file(self):
+        video = self.cleaned_data.get('video_file')
+        if video:
+            ext = os.path.splitext(video.name)[1].lower()
+            valid_extensions = ['.mp4', '.mov', '.webm', '.avi']
+            if ext not in valid_extensions:
+                raise ValidationError("Faqat video formatidagi fayllar yuklanishi mumkin (.mp4, .mov, .webm, .avi).")
+        return video
 
 
 class RSVPForm(forms.ModelForm):
