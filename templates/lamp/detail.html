@@ -134,7 +134,9 @@
 <div class="container py-5">
     <!-- Background Music Audio element -->
     {% if invitation.audio_file %}
-    <audio id="bgAudio" loop preload="auto" src="{{ invitation.audio_file.url }}"></audio>
+    <div class="text-center mb-3">
+        <audio id="bgAudio" loop preload="auto" controls src="{{ invitation.audio_file.url }}" style="display: inline-block; width: 100%; max-width: 280px; accent-color: #c99a45;"></audio>
+    </div>
     <button class="music-btn" id="musicToggle" onclick="toggleMusic()">
         <i class="fa-solid fa-music" id="musicIcon"></i> <span id="musicText">Musiqani yoqish</span>
     </button>
@@ -461,17 +463,23 @@
         }
     }
 
-    document.addEventListener('click', function initAudio() {
+    // Keep UI in sync if user uses native audio controls
+    document.addEventListener('DOMContentLoaded', () => {
         const audio = document.getElementById("bgAudio");
-        if (audio && audio.paused) {
-            audio.play().then(() => {
+        if (audio) {
+            audio.addEventListener('play', () => {
                 const icon = document.getElementById("musicIcon");
                 const text = document.getElementById("musicText");
                 if (icon) icon.className = "fa-solid fa-pause";
                 if (text) text.innerText = "Musiqani to'xtatish";
-            }).catch(e => {});
+            });
+            audio.addEventListener('pause', () => {
+                const icon = document.getElementById("musicIcon");
+                const text = document.getElementById("musicText");
+                if (icon) icon.className = "fa-solid fa-music";
+                if (text) text.innerText = "Musiqani yoqish";
+            });
         }
-        document.removeEventListener('click', initAudio);
-    }, { once: true });
+    });
 </script>
 {% endblock %}
