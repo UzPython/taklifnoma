@@ -119,10 +119,10 @@ class AntiDDoSIPBanMiddleware:
             rate_key = f'req_timestamps_{ip}'
             timestamps = cache.get(rate_key, [])
             
-            # Keep timestamps within the last 10 seconds
-            timestamps = [t for t in timestamps if now - t < 10.0]
+            # Keep timestamps within the last 60 seconds
+            timestamps = [t for t in timestamps if now - t < 60.0]
             
-            if len(timestamps) >= 5:
+            if len(timestamps) >= 50:
                 code = ban_ip(ip, 60)
                 cache.delete(rate_key)
                 
@@ -136,7 +136,7 @@ class AntiDDoSIPBanMiddleware:
                 return HttpResponseForbidden(get_blocked_html(msg, code))
             
             timestamps.append(now)
-            cache.set(rate_key, timestamps, 5)
+            cache.set(rate_key, timestamps, 60)
 
         response = self.get_response(request)
         return response

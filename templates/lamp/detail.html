@@ -2,6 +2,14 @@
 
 {% block title %}{{ invitation.title }} - Taklifnoma{% endblock %}
 
+{% block og_title %}{{ invitation.title }} - Taklifnoma{% endblock %}
+{% block og_description %}{{ invitation.message|truncatechars:150 }} | Vaqti: {{ invitation.event_datetime|date:"d.m.Y H:i" }} | Manzil: {{ invitation.venue_name }}{% endblock %}
+{% block og_image %}{% if invitation.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ invitation.cover_image.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}/favicon.jpg{% endif %}{% endblock %}
+
+{% block twitter_title %}{{ invitation.title }} - Taklifnoma{% endblock %}
+{% block twitter_description %}{{ invitation.message|truncatechars:150 }} | Vaqti: {{ invitation.event_datetime|date:"d.m.Y H:i" }} | Manzil: {{ invitation.venue_name }}{% endblock %}
+{% block twitter_image %}{% if invitation.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ invitation.cover_image.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}/favicon.jpg{% endif %}{% endblock %}
+
 {% block extra_head %}
 <!-- Confetti JS -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
