@@ -119,7 +119,7 @@ class FileUploadValidationTests(TestCase):
             'audio_file': malicious_file,
         })
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Faqat musiqa/audio formatidagi fayllar yuklanishi mumkin")
+        self.assertContains(response, "Faqat MP3 formatidagi audio fayllar yuklanishi mumkin")
 
     def test_invalid_video_file_rejected(self):
         self.client.force_login(self.user)
@@ -137,5 +137,5 @@ class FileUploadValidationTests(TestCase):
             'video_file': malicious_file,
         })
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Faqat video formatidagi fayllar yuklanishi mumkin")
+        self.assertContains(response, "Faqat MP4 formatidagi video fayllar yuklanishi mumkin")
 

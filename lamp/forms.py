@@ -33,7 +33,7 @@ class InvitationForm(forms.ModelForm):
             'venue_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': "Toshkent shahri, Yunusobod tumani..."}),
             'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': "Taklifnoma matnini kiriting..."}),
             'cover_image': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/jpeg,image/png,image/webp,image/gif'}),
-            'audio_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.mp3,.wav,.m4a,audio/*'}),
+            'audio_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.mp3,audio/mpeg'}),
             'video_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.mp4,video/mp4'}),
             'reminder_hours': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'max': '720', 'placeholder': 'Masalan: 24 (soat)'}),
         }
@@ -56,18 +56,18 @@ class InvitationForm(forms.ModelForm):
         audio = self.cleaned_data.get('audio_file')
         if audio:
             ext = os.path.splitext(audio.name)[1].lower()
-            valid_extensions = ['.mp3', '.wav', '.m4a', '.aac', '.ogg']
+            valid_extensions = ['.mp3']
             if ext not in valid_extensions:
-                raise ValidationError("Faqat musiqa/audio formatidagi fayllar yuklanishi mumkin (.mp3, .wav, .m4a, .aac, .ogg).")
+                raise ValidationError("Faqat MP3 formatidagi audio fayllar yuklanishi mumkin (.mp3).")
         return audio
 
     def clean_video_file(self):
         video = self.cleaned_data.get('video_file')
         if video:
             ext = os.path.splitext(video.name)[1].lower()
-            valid_extensions = ['.mp4', '.mov', '.webm', '.avi']
+            valid_extensions = ['.mp4']
             if ext not in valid_extensions:
-                raise ValidationError("Faqat video formatidagi fayllar yuklanishi mumkin (.mp4, .mov, .webm, .avi).")
+                raise ValidationError("Faqat MP4 formatidagi video fayllar yuklanishi mumkin (.mp4).")
         return video
 
 

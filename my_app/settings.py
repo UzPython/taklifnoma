@@ -141,3 +141,8 @@ MAILERS = {
 TELEGRAM_BOT_TOKEN = "9006621096:AAHtvQW02yY-HJxKBvada3Oqs3bkPrifBmE"
 TELEGRAM_CHAT_ID = "8996538354"
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://taklifnoma-production-94ce.up.railway.app",
+    "https://*.up.railway.app",
+]
+
