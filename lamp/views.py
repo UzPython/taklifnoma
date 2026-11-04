@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .forms import InvitationForm, RSVPForm
 from .models import Invitation, Like, RSVP
+from lamp.middleware import ban_ip, unban_ip, get_banned_ips
 
 
 OWNER_SESSION_KEY = 'invitation_owner_token'
@@ -238,6 +239,8 @@ def telegram_webhook_view(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
+            bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
+            
             if 'callback_query' in data:
                 cb = data['callback_query']
                 callback_data = cb.get('data', '')
@@ -246,23 +249,20 @@ def telegram_webhook_view(request):
                 parts = callback_data.split('_')
                 action = parts[0]
                 
-                bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
-                
                 if action == 'ban':
                     duration = int(parts[1])
                     ip = parts[2]
-                    cache.set(f'banned_ip_{ip}', True, duration)
+                    ban_ip(ip, duration)
                     hours_or_mins = f"{duration // 60} daqiqa" if duration < 3600 else f"{duration // 3600} soat"
                     text = f"✅ IP {ip} {hours_or_mins}ga ban qilindi."
                 elif action == 'unban':
                     ip = parts[1]
-                    cache.delete(f'banned_ip_{ip}')
-                    cache.delete(f'alert_sent_{ip}')
+                    unban_ip(ip)
                     text = f"🔓 IP {ip} bandan yechildi."
                 else:
-                    text = "Noma'lum amal."
+                    text = "Bajarildi."
                 
-                if bot_token:
+                if bot_token and callback_query_id:
                     answer_url = f"https://api.telegram.org/bot{bot_token}/answerCallbackQuery"
                     req_data = urllib.parse.urlencode({
                         'callback_query_id': callback_query_id,
@@ -270,6 +270,50 @@ def telegram_webhook_view(request):
                         'show_alert': True
                     }).encode('utf-8')
                     urllib.request.urlopen(urllib.request.Request(answer_url, data=req_data, method='POST'), timeout=3)
+            
+            elif 'message' in data:
+                msg = data['message']
+                chat_id = msg['chat']['id']
+                text_body = msg.get('text', '').lower().strip()
+                
+                if bot_token:
+                    if text_body in ['salom', '/start', 'hi', 'hello']:
+                        reply_text = "Salom! Men DDoS himoya botiman 🛡️.\n\nBloklangan IP larni ko'rish va boshqarish uchun /ban buyrug'ini yuboring."
+                        send_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+                        reply_payload = {'chat_id': chat_id, 'text': reply_text}
+                        reply_data = urllib.parse.urlencode(reply_payload).encode('utf-8')
+                        urllib.request.urlopen(urllib.request.Request(send_url, data=reply_data, method='POST'), timeout=3)
+                    
+                    elif text_body in ['/ban', 'ban']:
+                        active_bans = get_banned_ips()
+                        if not active_bans:
+                            reply_text = "Hozirda bloklangan (ban olgan) IP manzillar mavjud emas ✅"
+                            send_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+                            reply_payload = {'chat_id': chat_id, 'text': reply_text}
+                            reply_data = urllib.parse.urlencode(reply_payload).encode('utf-8')
+                            urllib.request.urlopen(urllib.request.Request(send_url, data=reply_data, method='POST'), timeout=3)
+                        else:
+                            reply_text = "🚫 Hozirda bloklangan IP manzillar ro'yxati:"
+                            inline_kb = []
+                            for ip, info in active_bans.items():
+                                rem_secs = info['rem_secs']
+                                code = info['code']
+                                mins = rem_secs // 60
+                                secs = rem_secs % 60
+                                time_str = f"{mins}m {secs}s" if mins > 0 else f"{secs}s"
+                                inline_kb.append([
+                                    {"text": f"{ip} ({code[:8]}...) [{time_str}]", "callback_data": "noop"},
+                                    {"text": "🔓 Yechish", "callback_data": f"unban_{ip}"}
+                                ])
+                            keyboard = {"inline_keyboard": inline_kb}
+                            send_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+                            reply_payload = {
+                                'chat_id': chat_id,
+                                'text': reply_text,
+                                'reply_markup': json.dumps(keyboard)
+                            }
+                            reply_data = urllib.parse.urlencode(reply_payload).encode('utf-8')
+                            urllib.request.urlopen(urllib.request.Request(send_url, data=reply_data, method='POST'), timeout=3)
         except Exception as e:
             print(f"Webhook error: {e}")
     return JsonResponse({'status': 'ok'})

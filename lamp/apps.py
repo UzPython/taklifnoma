@@ -13,9 +13,16 @@ class LampConfig(AppConfig):
     name = "lamp"
 
     def ready(self):
-        if os.environ.get('RUN_MAIN') == 'true':
-            thread = threading.Thread(target=start_telegram_polling, daemon=True)
-            thread.start()
+        if os.environ.get('RUN_MAIN') == 'true' or not settings.DEBUG:
+            bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
+            if bot_token:
+                try:
+                    webhook_url = "https://taklifnoma-production-94ce.up.railway.app/telegram/webhook/"
+                    url = f"https://api.tunnel.py.tel/bot{bot_token}/setWebhook?url={urllib.parse.quote(webhook_url)}" # Wait, standard api.telegram.org
+                    url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url={urllib.parse.quote(webhook_url)}"
+                    urllib.request.urlopen(urllib.request.Request(url, method='POST'), timeout=5)
+                except Exception as e:
+                    print(f"Set webhook error: {e}")
 
 def start_telegram_polling():
     time.sleep(3)
