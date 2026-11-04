@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "gunicorn my_app.wsgi --workers 1 --bind 0.0.0.0:$PORT",
+    "startCommand": "python manage.py migrate && python manage.py runserver 0.0.0.0:$PORT",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }

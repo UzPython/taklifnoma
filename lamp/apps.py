@@ -13,16 +13,28 @@ class LampConfig(AppConfig):
     name = "lamp"
 
     def ready(self):
-        if os.environ.get('RUN_MAIN') == 'true' or not settings.DEBUG:
-            bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
-            if bot_token:
+        bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
+        if bot_token:
+            def setup_webhook():
+                time.sleep(3)
                 try:
-                    webhook_url = "https://taklifnoma-production-94ce.up.railway.app/telegram/webhook/"
-                    url = f"https://api.tunnel.py.tel/bot{bot_token}/setWebhook?url={urllib.parse.quote(webhook_url)}" # Wait, standard api.telegram.org
+                    railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN') or os.environ.get('RAILWAY_STATIC_URL')
+                    custom_webhook = os.environ.get('WEBHOOK_URL')
+                    if custom_webhook:
+                        webhook_url = custom_webhook
+                    elif railway_domain:
+                        if not railway_domain.startswith('http'):
+                            railway_domain = f"https://{railway_domain}"
+                        webhook_url = f"{railway_domain.rstrip('/')}/telegram/webhook/"
+                    else:
+                        webhook_url = "https://taklifnoma-production-94ce.up.railway.app/telegram/webhook/"
+
                     url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url={urllib.parse.quote(webhook_url)}"
                     urllib.request.urlopen(urllib.request.Request(url, method='POST'), timeout=5)
                 except Exception as e:
                     print(f"Set webhook error: {e}")
+
+            threading.Thread(target=setup_webhook, daemon=True).start()
 
 def start_telegram_polling():
     time.sleep(3)
