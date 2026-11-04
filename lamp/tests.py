@@ -119,7 +119,25 @@ class FileUploadValidationTests(TestCase):
             'audio_file': malicious_file,
         })
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Faqat MP3 formatidagi audio fayllar yuklanishi mumkin")
+        self.assertContains(response, "Faqat MP3 yoki M4A formatidagi audio fayllar yuklanishi mumkin")
+
+    def test_m4a_audio_file_accepted(self):
+        self.client.force_login(self.user)
+        m4a_file = SimpleUploadedFile("audio.m4a", b"fake m4a audio content", content_type="audio/mp4")
+        response = self.client.post(reverse('create_invitation'), {
+            'event_type': 'wedding',
+            'template_style': 'paper',
+            'title': 'M4A Test',
+            'hosts': 'Hacker',
+            'event_datetime': '2030-05-01T10:00',
+            'venue_name': 'Venue',
+            'venue_address': 'Address',
+            'message': 'Test',
+            'reminder_hours': '24',
+            'audio_file': m4a_file,
+        }, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Invitation.objects.filter(title='M4A Test').exists())
 
     def test_invalid_video_file_rejected(self):
         self.client.force_login(self.user)
