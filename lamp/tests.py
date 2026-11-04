@@ -1,8 +1,9 @@
 import uuid
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -157,3 +158,20 @@ class FileUploadValidationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Faqat MP4 formatidagi video fayllar yuklanishi mumkin")
 
+
+class MediaServingTests(TestCase):
+    @override_settings(DEBUG=False)
+    def test_media_url_serves_audio_when_debug_is_false(self):
+        relative_path = f"audio/test-{uuid.uuid4()}.mp3"
+        audio_path = settings.MEDIA_ROOT / relative_path
+        audio_path.parent.mkdir(parents=True, exist_ok=True)
+        audio_content = b"test audio data"
+
+        try:
+            audio_path.write_bytes(audio_content)
+            response = self.client.get(f"/media/{relative_path}")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(b"".join(response.streaming_content), audio_content)
+            self.assertEqual(response["Content-Type"], "audio/mpeg")
+        finally:
+            audio_path.unlink(missing_ok=True)
