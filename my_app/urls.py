@@ -19,8 +19,19 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import HttpResponse
+import os
+
+def favicon_view(request):
+    favicon_path = os.path.join(settings.MEDIA_ROOT, 'favicon.jpg')
+    if os.path.exists(favicon_path):
+        with open(favicon_path, 'rb') as f:
+            return HttpResponse(f.read(), content_type='image/jpeg')
+    return HttpResponse(status=404)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("favicon.ico", favicon_view),
+    path("favicon.jpg", favicon_view),
     path("", include("lamp.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
