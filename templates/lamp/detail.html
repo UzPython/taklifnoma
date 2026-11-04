@@ -134,9 +134,7 @@
 <div class="container py-5">
     <!-- Background Music Audio element -->
     {% if invitation.audio_file %}
-    <audio id="bgAudio" loop preload="auto">
-        <source src="{{ invitation.audio_file.url }}">
-    </audio>
+    <audio id="bgAudio" loop preload="auto" src="{{ invitation.audio_file.url }}"></audio>
     <button class="music-btn" id="musicToggle" onclick="toggleMusic()">
         <i class="fa-solid fa-music" id="musicIcon"></i> <span id="musicText">Musiqani yoqish</span>
     </button>
