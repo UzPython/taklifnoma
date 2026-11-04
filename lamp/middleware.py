@@ -119,8 +119,8 @@ class AntiDDoSIPBanMiddleware:
             rate_key = f'req_timestamps_{ip}'
             timestamps = cache.get(rate_key, [])
             
-            # Keep timestamps within the last 1 second
-            timestamps = [t for t in timestamps if now - t < 1.0]
+            # Keep timestamps within the last 10 seconds
+            timestamps = [t for t in timestamps if now - t < 10.0]
             
             if len(timestamps) >= 5:
                 code = ban_ip(ip, 60)
@@ -180,4 +180,4 @@ class AntiDDoSIPBanMiddleware:
             ip = x_forwarded_for.split(',')[0].strip()
         else:
             ip = request.META.get('REMOTE_ADDR')
-        return ip
+        return ip or '127.0.0.1'
