@@ -45,10 +45,10 @@ def logout_view(request):
 
 def google_login_redirect_view(request):
     host = request.get_host()
-    if 'localhost' in host:
+    if '127.0.0.1' in host or 'localhost' in host:
         redirect_uri = f"http://{host}/auth/google/"
     else:
-        redirect_uri = "http://127.0.0.1:8000/auth/google/"
+        redirect_uri = f"https://{host}/auth/google/"
 
     params = {
         'client_id': GOOGLE_CLIENT_ID,
@@ -81,10 +81,10 @@ def google_auth_callback_view(request):
         return redirect('login')
     
     host = request.get_host()
-    if 'localhost' in host:
+    if '127.0.0.1' in host or 'localhost' in host:
         redirect_uri = f"http://{host}/auth/google/"
     else:
-        redirect_uri = "http://127.0.0.1:8000/auth/google/"
+        redirect_uri = f"https://{host}/auth/google/"
 
     token_url = "https://oauth2.googleapis.com/token"
     payload = {
