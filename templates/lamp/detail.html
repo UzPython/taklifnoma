@@ -643,21 +643,49 @@
             };
 
             video.addEventListener('timeupdate', () => {
-                const current = video.currentTime;
-                const duration = video.duration || 1;
-                const percent = (current / duration) * 100;
-                progressBar.style.width = percent + "%";
-                timeDisplay.innerText = `${formatTime(current)} / ${formatTime(duration)}`;
+                if (!isDragging) {
+                    const current = video.currentTime;
+                    const duration = video.duration || 1;
+                    const percent = (current / duration) * 100;
+                    progressBar.style.width = percent + "%";
+                    timeDisplay.innerText = `${formatTime(current)} / ${formatTime(duration)}`;
+                }
             });
 
             video.addEventListener('ended', () => {
                 playIcon.className = "fa-solid fa-play";
             });
 
-            progressContainer.addEventListener('click', (e) => {
+            let isDragging = false;
+
+            function updateVideoProgress(e) {
                 const rect = progressContainer.getBoundingClientRect();
-                const pos = (e.clientX - rect.left) / rect.width;
-                video.currentTime = pos * video.duration;
+                let pos = (e.clientX - rect.left) / rect.width;
+                pos = Math.max(0, Math.min(1, pos));
+                if (video.duration && !isNaN(video.duration)) {
+                    video.currentTime = pos * video.duration;
+                    progressBar.style.width = (pos * 100) + "%";
+                    timeDisplay.innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+                }
+            }
+
+            progressContainer.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                updateVideoProgress(e);
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    updateVideoProgress(e);
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            progressContainer.addEventListener('click', (e) => {
+                updateVideoProgress(e);
             });
 
             window.toggleVideoMute = function() {
@@ -667,10 +695,11 @@
             };
 
             window.toggleVideoFullscreen = function() {
-                if (video.requestFullscreen) {
-                    video.requestFullscreen();
-                } else if (video.webkitRequestFullscreen) {
-                    video.webkitRequestFullscreen();
+                const container = video.parentElement.parentElement;
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
                 }
             };
         }
