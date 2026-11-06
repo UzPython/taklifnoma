@@ -262,17 +262,19 @@
             </div>
             <div class="p-2 rounded-4 shadow-lg border border-warning border-opacity-50 bg-black mx-auto" style="max-width: 560px; box-shadow: 0 25px 60px rgba(0,0,0,0.65), 0 0 25px rgba(211,174,105,0.25) !important;">
                 <div class="position-relative overflow-hidden rounded-3 bg-black">
-                    <video id="customVideo" class="w-100 d-block rounded-3" preload="metadata" playsinline style="max-height: 460px; object-fit: contain; background: #000;">
+                    <video id="customVideo" class="w-100 d-block rounded-3" preload="metadata" playsinline style="height: 440px; width: 100%; object-fit: cover; background: #000;">
                         <source src="{{ invitation.video_file.url }}" type="video/mp4">
                         Sizning brauzeringiz videoni qo'llab-quvvatlamaydi.
                     </video>
 
                     <!-- Custom Video Controls Overlay -->
-                    <div class="position-absolute bottom-0 start-0 end-0 p-3 d-flex flex-column gap-2" style="background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); backdrop-filter: blur(4px);">
-                        <!-- Progress Bar (Yellow) -->
-                        <div class="position-relative w-100 bg-secondary bg-opacity-50 rounded-pill" style="height: 7px; cursor: pointer;" id="videoProgressContainer">
-                            <div class="bg-warning rounded-pill h-100 position-relative" id="videoProgressBar" style="width: 0%;">
-                                <div class="position-absolute top-50 end-0 translate-middle-y bg-white rounded-circle shadow" style="width: 12px; height: 12px;"></div>
+                    <div class="position-absolute bottom-0 start-0 end-0 p-3 d-flex flex-column gap-2" style="background: linear-gradient(to top, rgba(0,0,0,0.92), transparent); backdrop-filter: blur(4px);">
+                        <!-- Progress Bar (Yellow) with generous hit area -->
+                        <div class="position-relative w-100 py-1" style="cursor: pointer;" id="videoProgressContainer">
+                            <div class="w-100 bg-secondary bg-opacity-50 rounded-pill position-relative" style="height: 8px;">
+                                <div class="bg-warning rounded-pill h-100 position-relative" id="videoProgressBar" style="width: 0%;">
+                                    <div class="position-absolute top-50 end-0 translate-middle-y bg-white rounded-circle shadow" style="width: 14px; height: 14px;"></div>
+                                </div>
                             </div>
                         </div>
 
