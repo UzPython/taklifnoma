@@ -29,26 +29,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,700;1,400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f7f6f2;
-            --text-color: #202820;
+            --bg-color: #f8f7f2;
+            --text-color: #1a221b;
             --card-bg: #ffffff;
-            --nav-bg: #14251e;
-            --accent: #d3ae69;
-            --surface-border: rgba(32, 40, 32, 0.1);
-            --muted-color: #737b73;
+            --nav-bg: #11211b;
+            --accent: #d4af37;
+            --surface-border: rgba(26, 34, 27, 0.08);
+            --muted-color: #6b726b;
+            --glow-shadow: 0 20px 50px rgba(212, 175, 55, 0.15);
         }
         [data-bs-theme="dark"] {
-            --bg-color: #111914;
-            --text-color: #f3f4f6;
-            --card-bg: #19231d;
-            --nav-bg: #0b120e;
-            --surface-border: rgba(255,255,255,0.1);
-            --muted-color: #a4aea6;
+            --bg-color: #0d1410;
+            --text-color: #f1f5f2;
+            --card-bg: #16201b;
+            --nav-bg: #070c09;
+            --surface-border: rgba(255,255,255,0.08);
+            --muted-color: #9ca8a0;
+            --glow-shadow: 0 20px 50px rgba(212, 175, 55, 0.22);
         }
         body {
             font-family: 'Montserrat', sans-serif;
             background:
-                radial-gradient(ellipse at 10% 0%, rgba(211, 174, 105, 0.08), transparent 34rem),
+                radial-gradient(circle at 15% 0%, rgba(212, 175, 55, 0.1), transparent 35rem),
+                radial-gradient(circle at 85% 90%, rgba(70, 107, 85, 0.08), transparent 30rem),
                 var(--bg-color);
             color: var(--text-color);
             transition: background-color 0.3s ease, color 0.3s ease;
@@ -64,52 +67,61 @@
             font-family: 'Playfair Display', serif;
         }
         .navbar {
-            background: linear-gradient(110deg, #102019, #193126 58%, #26382c) !important;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            transition: background 0.3s ease;
+            background: linear-gradient(110deg, #0d1b15, #162c22 55%, #1f382b) !important;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
         .navbar-brand {
             font-weight: 700;
-            letter-spacing: 0.2px;
+            letter-spacing: 0.3px;
         }
         .navbar-brand i {
             color: var(--accent);
+            filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.4));
         }
         .navbar .nav-link {
             border-radius: 999px;
-            transition: color 0.2s ease, background-color 0.2s ease;
+            transition: all 0.25s ease;
         }
         .navbar .nav-link:hover,
         .navbar .nav-link.active {
             color: #fff !important;
-            background: rgba(255,255,255,0.11);
+            background: rgba(212, 175, 55, 0.16);
+            transform: translateY(-1px);
         }
         .navbar .btn-warning {
-            background: linear-gradient(135deg, #ead5a9, #d3ae69);
+            background: linear-gradient(135deg, #f0dfb8, #d4af37);
             border: 0;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
         }
         .card {
             background-color: var(--card-bg) !important;
             color: var(--text-color) !important;
-            transition: background-color 0.3s ease, color 0.3s ease, transform 0.25s ease, box-shadow 0.25s ease;
+            border: 1px solid var(--surface-border) !important;
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .card:not(.invitation-card):hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px);
+            box-shadow: var(--glow-shadow);
         }
         footer {
             background-color: var(--nav-bg);
             color: #9ca3af;
-            padding: 32px 0;
-            margin-top: 64px;
-            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 40px 0;
+            margin-top: 80px;
+            border-top: 1px solid rgba(212, 175, 55, 0.12);
         }
         .btn {
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn:hover {
+            transform: translateY(-1px);
         }
         .btn:focus-visible,
         .theme-toggle-btn:focus-visible,
         .navbar a:focus-visible {
-            outline: 3px solid rgba(211, 174, 105, 0.8);
+            outline: 3px solid rgba(212, 175, 55, 0.8);
             outline-offset: 3px;
         }
         .form-control,
@@ -117,11 +129,15 @@
             min-height: 48px;
             border-color: var(--surface-border);
             border-radius: 12px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
         }
         .form-control:focus,
         .form-select:focus {
-            border-color: #b69a69;
-            box-shadow: 0 0 0 0.22rem rgba(211, 174, 105, 0.18);
+            border-color: #d4af37;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.2);
         }
         textarea.form-control {
             min-height: 120px;
@@ -130,17 +146,19 @@
             color: var(--muted-color) !important;
         }
         .theme-toggle-btn {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(212, 175, 55, 0.3);
             color: #fff;
             border-radius: 50px;
             padding: 6px 14px;
             font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
         }
         .theme-toggle-btn:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(212, 175, 55, 0.2);
+            border-color: rgba(212, 175, 55, 0.6);
+            transform: translateY(-1px);
         }
         @media (max-width: 991.98px) {
             .navbar-nav {

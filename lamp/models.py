@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.core.validators import URLValidator
 
 class Invitation(models.Model):
     EVENT_TYPES = [
@@ -25,9 +26,15 @@ class Invitation(models.Model):
     title = models.CharField(max_length=200, default="To'y taklifnomasi", verbose_name="Taklifnoma sarlavhasi")
     hosts = models.CharField(max_length=250, verbose_name="Egasining ismlari (masalan: Anvar & Gulnora)")
     guest_name = models.TextField(blank=True, null=True, verbose_name="Mehmonlar ismi (ixtiyoriy)")
-    event_datetime = models.DateTimeField(verbose_name="Tadbir vaqti va sanasi")
+    event_datetime = models.DateTimeField(verbose_name="Tadbir vaqti va sanasi", blank=True, null=True)
     venue_name = models.CharField(max_length=250, verbose_name="Restoran / Maskon nomi")
-    venue_address = models.TextField(verbose_name="To'liq manzil")
+    venue_address = models.TextField(verbose_name="To'liq manzil", blank=True, null=True, default="")
+    venue_map_url = models.URLField(
+        max_length=500,
+        blank=True,
+        verbose_name="Xarita havolasi",
+        validators=[URLValidator(schemes=['http', 'https'])],
+    )
     message = models.TextField(verbose_name="Taklifnoma matni / Tabrik", default="Sizni hayotimizdagi eng quvonchli kunda qadrli mehmonimiz bo'lishga taklif qilamiz!")
     cover_image = models.ImageField(upload_to='covers/', blank=True, null=True, verbose_name="Juftlik yoki tadbir rasmi (ixtiyoriy)")
     audio_file = models.FileField(upload_to='audio/', blank=True, null=True, verbose_name="Fon musiqasi (MP3 fayl yuklash)")

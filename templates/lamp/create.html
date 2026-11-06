@@ -3,6 +3,7 @@
 {% block title %}{% if edit_mode %}Taklifnomani tahrirlash{% else %}Taklifnoma yaratish{% endif %} - Taklifnoma.uz{% endblock %}
 
 {% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
     .create-layout {
         max-width: 1040px;
@@ -104,6 +105,17 @@
         color: var(--muted-color);
         font-size: .78rem;
     }
+    #venue-map {
+        height: 360px;
+        border: 1px solid var(--surface-border);
+        border-radius: 16px;
+        z-index: 0;
+    }
+    .venue-map-status {
+        min-height: 1.5rem;
+        color: var(--muted-color);
+        font-size: .82rem;
+    }
     @media (max-width: 575.98px) {
         .create-intro {
             border-radius: 21px;
@@ -147,32 +159,34 @@
 
                 <section class="form-section">
                     <div class="form-section-heading">
-                        <div class="form-section-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                        <div class="form-section-icon"><i class="fa-solid fa-heart"></i></div>
                         <div>
-                            <h2 class="fw-bold mb-1">Tadbir haqida</h2>
-                            <p class="mb-0">Tadbir turi, sarlavhasi va ko‘rinishini tanlang.</p>
+                            <h2 class="fw-bold mb-1">Ism va familiya</h2>
+                            <p class="mb-0">Taklifnomada ko'rsatiladigan ism-familiyani kiriting.</p>
                         </div>
                     </div>
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold" for="{{ form.event_type.id_for_label }}">{{ form.event_type.label }}</label>
-                            {{ form.event_type }}
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold" for="{{ form.template_style.id_for_label }}">{{ form.template_style.label }}</label>
-                            {{ form.template_style }}
-                        </div>
                         <div class="col-12">
-                            <label class="form-label fw-semibold" for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
-                            {{ form.title }}
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold" for="{{ form.hosts.id_for_label }}">{{ form.hosts.label }}</label>
+                            <label class="form-label fw-semibold" for="{{ form.hosts.id_for_label }}">Ism va familiya</label>
                             {{ form.hosts }}
+                            <div class="form-text">Masalan: Anvar va Dilnoza</div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold" for="{{ form.event_datetime.id_for_label }}">{{ form.event_datetime.label }}</label>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-heading">
+                        <div class="form-section-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                        <div>
+                            <h2 class="fw-bold mb-1">Sana va Soat</h2>
+                            <p class="mb-0">Tadbir bo'ladigan sana va aniq vaqtni kiriting.</p>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" for="{{ form.event_datetime.id_for_label }}">Tadbir vaqti va sanasi</label>
                             {{ form.event_datetime }}
+                            <div class="form-text">Sana va soatni tanlang (masalan: 15.06.2026, 17:00).</div>
                         </div>
                     </div>
                 </section>
@@ -181,61 +195,33 @@
                     <div class="form-section-heading">
                         <div class="form-section-icon"><i class="fa-solid fa-location-dot"></i></div>
                         <div>
-                            <h2 class="fw-bold mb-1">Mehmonlar uchun ma’lumot</h2>
-                            <p class="mb-0">Mehmon, manzil va shaxsiy taklif matnini kiriting.</p>
+                            <h2 class="fw-bold mb-1">Manzil</h2>
+                            <p class="mb-0">Restoran yoki to'yxona nomi va to'liq manzilni kiriting.</p>
                         </div>
                     </div>
                     <div class="row g-3">
                         <div class="col-12">
-                            <label class="form-label fw-semibold" for="{{ form.guest_name.id_for_label }}">{{ form.guest_name.label }}</label>
-                            {{ form.guest_name }}
-                            <div class="form-text">Bo‘sh qoldirsangiz, taklifnoma hamma uchun umumiy bo‘ladi. Shaxsiy taklif uchun har bir qatorga bittadan ism yozing.</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold" for="{{ form.venue_name.id_for_label }}">{{ form.venue_name.label }}</label>
+                            <label class="form-label fw-semibold" for="{{ form.venue_name.id_for_label }}">Restoran / To'yxona nomi</label>
                             {{ form.venue_name }}
+                            <div class="form-text">Masalan: "Oqsaroy" tantanalar saroyi</div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold" for="{{ form.venue_address.id_for_label }}">{{ form.venue_address.label }}</label>
-                            {{ form.venue_address }}
+                        {{ form.venue_address }}
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" for="venue-map-search-input">Xaritadan joyni belgilang</label>
+                            <div class="input-group mb-2">
+                                <input id="venue-map-search-input" type="search" class="form-control" placeholder="Joy nomi yoki manzilni qidiring">
+                                <button id="venue-map-search-button" class="btn btn-outline-secondary" type="button">Qidirish</button>
+                            </div>
+                            <div id="venue-map" aria-label="Tadbir manzilini xaritadan tanlash"></div>
+                            <div id="venue-map-status" class="venue-map-status mt-2" role="status" aria-live="polite">
+                                Xarita ichida joyni qidiring yoki xaritani surib, kerakli nuqtani bosing.
+                            </div>
+                            <div class="form-text">Xaritadan nuqta tanlanganda manzil va xarita havolasi avtomatik to‘ldiriladi. Xarita © OpenStreetMap.</div>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-semibold" for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
-                            {{ form.message }}
-                        </div>
-                    </div>
-                </section>
-
-                <section class="form-section">
-                    <div class="form-section-heading">
-                        <div class="form-section-icon"><i class="fa-solid fa-photo-film"></i></div>
-                        <div>
-                            <h2 class="fw-bold mb-1">Taklifnomani bezang</h2>
-                            <p class="mb-0">Bu qadam ixtiyoriy — o‘zingizning rasm, audio yoki videongizni qo‘shing.</p>
-                        </div>
-                    </div>
-                    <div class="media-fields">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label fw-semibold" for="{{ form.cover_image.id_for_label }}">{{ form.cover_image.label }}</label>
-                                {{ form.cover_image }}
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold" for="{{ form.audio_file.id_for_label }}">{{ form.audio_file.label }}</label>
-                                {{ form.audio_file }}
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold" for="{{ form.video_file.id_for_label }}">{{ form.video_file.label }}</label>
-                                {{ form.video_file }}
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold" for="{{ form.reminder_hours.id_for_label }}">{{ form.reminder_hours.label }}</label>
-                                <div class="input-group">
-                                    {{ form.reminder_hours }}
-                                    <span class="input-group-text">soat</span>
-                                </div>
-                                <div class="form-text">Tadbir boshlanishidan oldingi eslatma vaqti.</div>
-                            </div>
+                            <label class="form-label fw-semibold" for="{{ form.venue_map_url.id_for_label }}">Xarita havolasi (ixtiyoriy)</label>
+                            {{ form.venue_map_url }}
+                            <div class="form-text">Xaritada joy tanlasangiz, havola shu yerga avtomatik yoziladi. Xohlasangiz, xarita havolasini qo‘lda ham kiritishingiz mumkin.</div>
                         </div>
                     </div>
                 </section>
@@ -250,4 +236,132 @@
         </div>
     </div>
 </div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    (() => {
+        const mapElement = document.getElementById('venue-map');
+        const mapStatus = document.getElementById('venue-map-status');
+        const mapLinkField = document.getElementById('{{ form.venue_map_url.id_for_label }}');
+        const addressField = document.getElementById('{{ form.venue_address.id_for_label }}');
+        const searchField = document.getElementById('venue-map-search-input');
+        const searchButton = document.getElementById('venue-map-search-button');
+        const defaultCenter = [41.3111, 69.2797];
+
+        if (!window.L) {
+            mapStatus.textContent = 'Xarita yuklanmadi. Internet aloqasini tekshirib, sahifani qayta yuklang.';
+            return;
+        }
+
+        const map = L.map(mapElement).setView(defaultCenter, 12);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            maxNativeZoom: 15,
+            attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Sources: Esri, TomTom, Garmin, FAO, NOAA, USGS, &copy; OpenStreetMap contributors',
+        }).addTo(map);
+
+        let marker = null;
+        let reverseLookupTimer = null;
+
+        const selectLocation = (lat, lon) => {
+            const point = [lat, lon];
+            if (marker) {
+                marker.setLatLng(point);
+            } else {
+                marker = L.marker(point).addTo(map);
+            }
+            mapLinkField.value = `https://www.google.com/maps/search/?api=1&query=${lat.toFixed(6)},${lon.toFixed(6)}`;
+            return point;
+        };
+
+        const lookupAddress = async (lat, lon) => {
+            mapStatus.textContent = 'Manzil aniqlanmoqda...';
+            try {
+                const params = new URLSearchParams({
+                    format: 'jsonv2',
+                    lat: String(lat),
+                    lon: String(lon),
+                    zoom: '18',
+                    addressdetails: '1',
+                });
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`, {
+                    headers: { 'Accept-Language': 'uz' },
+                });
+                if (!response.ok) {
+                    throw new Error(`Manzilni aniqlash xatosi (${response.status}).`);
+                }
+                const result = await response.json();
+                if (!result.display_name) {
+                    throw new Error('Tanlangan nuqta uchun manzil topilmadi.');
+                }
+                addressField.value = result.display_name;
+                mapStatus.textContent = `Tanlangan manzil: ${result.display_name}`;
+            } catch (error) {
+                mapStatus.textContent = `${error.message} Manzilni qo‘lda kiritishingiz mumkin.`;
+            }
+        };
+
+        map.on('click', (event) => {
+            const { lat, lng } = event.latlng;
+            selectLocation(lat, lng);
+            mapStatus.textContent = `Nuqta tanlandi: ${lat.toFixed(6)}, ${lng.toFixed(6)}. Manzil aniqlanmoqda...`;
+            clearTimeout(reverseLookupTimer);
+            reverseLookupTimer = setTimeout(() => lookupAddress(lat, lng), 1000);
+        });
+
+        searchButton.addEventListener('click', async () => {
+            const query = searchField.value.trim();
+            if (!query) {
+                mapStatus.textContent = 'Qidirish uchun joy nomi yoki manzilni kiriting.';
+                searchField.focus();
+                return;
+            }
+            searchButton.disabled = true;
+            mapStatus.textContent = 'Joy qidirilmoqda...';
+            try {
+                const params = new URLSearchParams({
+                    format: 'jsonv2',
+                    q: query,
+                    countrycodes: 'uz',
+                    limit: '1',
+                });
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
+                    headers: { 'Accept-Language': 'uz' },
+                });
+                if (!response.ok) {
+                    throw new Error(`Qidiruv xatosi (${response.status}).`);
+                }
+                const results = await response.json();
+                if (!results.length) {
+                    throw new Error('Bu joy topilmadi. Boshqa nom bilan qidiring.');
+                }
+                const result = results[0];
+                const point = selectLocation(Number(result.lat), Number(result.lon));
+                map.setView(point, 15);
+                addressField.value = result.display_name;
+                mapStatus.textContent = `Tanlangan manzil: ${result.display_name}`;
+            } catch (error) {
+                mapStatus.textContent = error.message;
+            } finally {
+                searchButton.disabled = false;
+            }
+        });
+
+        searchField.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                searchButton.click();
+            }
+        });
+
+        const existingCoordinates = mapLinkField.value.match(/[?&]query=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+        if (existingCoordinates) {
+            const point = [Number(existingCoordinates[1]), Number(existingCoordinates[2])];
+            if (point.every(Number.isFinite)) {
+                selectLocation(...point);
+                map.setView(point, 15);
+            }
+        }
+        setTimeout(() => map.invalidateSize(), 0);
+    })();
+</script>
 {% endblock %}

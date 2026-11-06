@@ -252,11 +252,6 @@
             </span>
         </div>
 
-        <!-- Warning Alert if < 24 hours remaining -->
-        <div id="eventWarning" class="alert alert-danger d-none shadow-sm mb-4 py-2 fw-semibold border-0 text-dark bg-warning bg-opacity-75">
-            <i class="fa-solid fa-triangle-exclamation me-1"></i> Diqqat! Tadbirga 24 soatdan kam vaqt qoldi!
-        </div>
-
         <div class="text-uppercase tracking-widest small opacity-75 mb-2">Aziz mehmon sizni</div>
         
         <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-3">
@@ -352,59 +347,11 @@
                     </div>
                 </div>
 
-                <!-- Action Buttons: Map & Calendar -->
+                <!-- Map action -->
                 <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top border-secondary border-opacity-25">
-                    <a href="https://maps.google.com/?q={{ invitation.venue_name|urlencode }} {{ invitation.venue_address|urlencode }}" target="_blank" class="btn btn-outline-light btn-sm flex-fill">
+                    <a href="{% if invitation.venue_map_url %}{{ invitation.venue_map_url }}{% else %}https://maps.google.com/?q={{ invitation.venue_name|urlencode }} {{ invitation.venue_address|urlencode }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-sm flex-fill">
                         <i class="fa-solid fa-map-location-dot me-1 text-danger"></i> Lokatsiyani ochish
                     </a>
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ invitation.title|urlencode }}&details={{ invitation.message|urlencode }}&location={{ invitation.venue_name|urlencode }}, {{ invitation.venue_address|urlencode }}" target="_blank" class="btn btn-outline-light btn-sm flex-fill">
-                        <i class="fa-solid fa-calendar-plus me-1 text-warning"></i> Kalendarga qo'shish
-                    </a>
-                </div>
-                <div class="mt-3 pt-2 border-top border-secondary border-opacity-25 text-start">
-                    <label class="form-label small fw-semibold text-warning mb-1">
-                        <i class="fa-solid fa-bell me-1"></i> Eslatma vaqtini tanlang (Qancha oldin xabar beraylik?):
-                    </label>
-                    <div class="input-group input-group-sm">
-                        <select id="userReminderMinutes" class="form-select form-select-sm bg-dark text-white border-warning">
-                            <option value="1">1 minut oldin</option>
-                            <option value="5">5 minut oldin</option>
-                            <option value="30">30 minut oldin</option>
-                            <option value="60">1 soat oldin</option>
-                            <option value="180">3 soat oldin</option>
-                            <option value="360">6 soat oldin</option>
-                            <option value="720">12 soat oldin</option>
-                            <option value="1440" selected>24 soat (1 kun) oldin</option>
-                            <option value="2880">48 soat (2 kun) oldin</option>
-                            <option value="4320">72 soat (3 kun) oldin</option>
-                        </select>
-                        <button class="btn btn-warning btn-sm text-dark fw-bold px-3" onclick="enableCustomPushReminder()">
-                            Yoqish
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Countdown -->
-        <div class="countdown-box">
-            <div class="small text-uppercase fw-semibold mb-2 opacity-75">Tadbirgacha qolgan vaqt</div>
-            <div class="row text-center" id="countdown">
-                <div class="col-3">
-                    <div class="countdown-item" id="days">00</div>
-                    <div class="countdown-label">Kun</div>
-                </div>
-                <div class="col-3">
-                    <div class="countdown-item" id="hours">00</div>
-                    <div class="countdown-label">Soat</div>
-                </div>
-                <div class="col-3">
-                    <div class="countdown-item" id="minutes">00</div>
-                    <div class="countdown-label">Daqiqa</div>
-                </div>
-                <div class="col-3">
-                    <div class="countdown-item" id="seconds">00</div>
-                    <div class="countdown-label">Soniya</div>
                 </div>
             </div>
         </div>
@@ -516,70 +463,6 @@
             origin: { y: 0.6 }
         });
     });
-
-    const eventDate = new Date("{{ invitation.event_datetime|date:'Y-m-d H:i:s' }}").getTime();
-    let customReminderMillis = 24 * 60 * 60 * 1000;
-    let notificationTriggered = false;
-
-    function enableCustomPushReminder() {
-        const selectEl = document.getElementById("userReminderMinutes");
-        const chosenMinutes = parseInt(selectEl.value) || 1440;
-        customReminderMillis = chosenMinutes * 60 * 1000;
-
-        if (!("Notification" in window)) {
-            alert("Sizning qurilmangiz yoki brauzeringiz bildirishnomalarni qo'llab-quvvatlamaydi.");
-            return;
-        }
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                const timeText = chosenMinutes < 60 ? chosenMinutes + " minut" : (chosenMinutes / 60) + " soat";
-                alert(`Eslatmalar muvaffaqiyatli yoqildi! Tadbirdan ${timeText} oldin telefon yoki PC'ingizga bildirishnoma keladi.`);
-                new Notification("Taklifnoma Eslatmasi Faollashdi 🎉", {
-                    body: "{{ invitation.title }} uchun eslatma o'rnatildi (" + timeText + " oldin)."
-                });
-            } else {
-                alert("Bildirishnoma uchun ruxsat berilmadi.");
-            }
-        });
-    }
-
-    const timer = setInterval(function() {
-        const now = new Date().getTime();
-        const distance = eventDate - now;
-
-        if (distance < 0) {
-            clearInterval(timer);
-            document.getElementById("countdown").innerHTML = "<div class='col-12 text-success fw-bold'>Tadbir boshlandi!</div>";
-            const warningEl = document.getElementById("eventWarning");
-            if (warningEl) warningEl.classList.add("d-none");
-            return;
-        }
-
-        // Check custom reminder threshold
-        if (distance <= customReminderMillis && distance > 0 && !notificationTriggered) {
-            notificationTriggered = true;
-            const warningEl = document.getElementById("eventWarning");
-            if (warningEl) {
-                warningEl.classList.remove("d-none");
-                warningEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> Diqqat! Tadbir vaqti yaqinlashmoqda!`;
-            }
-            if (Notification.permission === "granted") {
-                new Notification("⏰ Tadbir vaqti yaqinlashmoqda!", {
-                    body: "{{ invitation.title }} - {{ invitation.venue_name }}. Eslatma vaqti keldi!"
-                });
-            }
-        }
-
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        document.getElementById("days").innerText = String(days).padStart(2, '0');
-        document.getElementById("hours").innerText = String(hours).padStart(2, '0');
-        document.getElementById("minutes").innerText = String(minutes).padStart(2, '0');
-        document.getElementById("seconds").innerText = String(seconds).padStart(2, '0');
-    }, 1000);
 
     function toggleMusic() {
         const audio = document.getElementById("bgAudio");

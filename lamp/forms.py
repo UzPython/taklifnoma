@@ -8,35 +8,25 @@ class InvitationForm(forms.ModelForm):
     class Meta:
         model = Invitation
         fields = [
-            'event_type',
-            'template_style',
-            'title',
             'hosts',
-            'guest_name',
             'event_datetime',
             'venue_name',
             'venue_address',
-            'message',
-            'cover_image',
-            'audio_file',
-            'video_file',
-            'reminder_hours',
+            'venue_map_url',
         ]
         widgets = {
-            'event_type': forms.Select(attrs={'class': 'form-select'}),
-            'template_style': forms.Select(attrs={'class': 'form-select'}),
-            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Masalan: Anvar va Dilfuza nikoh to'yi"}),
-            'hosts': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Masalan: Alisher & Zaynab"}),
-            'guest_name': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': "Bo'sh qoldirsangiz hammaga umumiy bo'ladi. Har bir qatorga bitta mehmon ismini yozing (xohlagancha odam)..."}),
-            'event_datetime': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
-            'venue_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Masalan: 'Oqsaroy' tantanalar saroyi"}),
-            'venue_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': "Toshkent shahri, Yunusobod tumani..."}),
-            'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': "Taklifnoma matnini kiriting..."}),
-            'cover_image': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/jpeg,image/png,image/webp,image/gif'}),
-            'audio_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.mp3,.m4a,audio/mpeg,audio/mp4'}),
-            'video_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.mp4,video/mp4'}),
-            'reminder_hours': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'max': '720', 'placeholder': 'Masalan: 24 (soat)'}),
+            'hosts': forms.TextInput(attrs={'class': 'form-control form-control-lg', 'placeholder': 'Masalan: Anvar va Dilnoza'}),
+            'event_datetime': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control form-control-lg'}, format='%Y-%m-%dT%H:%M'),
+            'venue_name': forms.TextInput(attrs={'class': 'form-control form-control-lg', 'placeholder': "Masalan: 'Oqsaroy' tantanalar saroyi"}),
+            'venue_address': forms.HiddenInput(),
+            'venue_map_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://maps.app.goo.gl/...'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in ['event_datetime', 'venue_address', 'venue_map_url']:
+            if field_name in self.fields:
+                self.fields[field_name].required = False
 
     def clean_cover_image(self):
         image = self.cleaned_data.get('cover_image')
@@ -80,4 +70,3 @@ class RSVPForm(forms.ModelForm):
             'attendance': forms.Select(attrs={'class': 'form-select'}),
             'wish_message': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Tabrik va tilaklaringizni yozib qoldiring...'}),
         }
-

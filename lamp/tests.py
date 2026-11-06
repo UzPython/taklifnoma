@@ -46,6 +46,13 @@ class InvitationPrivacyTests(TestCase):
             reverse('invitation_detail', args=[self.invitation.pk])
         )
         self.assertContains(response, 'Private celebration')
+        self.assertNotContains(response, 'Tadbirgacha qolgan vaqt')
+        self.assertNotContains(response, 'Tadbir boshlandi!')
+        self.assertNotContains(response, 'Eslatma vaqtini tanlang')
+        self.assertNotContains(response, 'userReminderMinutes')
+        self.assertNotContains(response, 'enableCustomPushReminder')
+        self.assertNotContains(response, 'Kalendarga qo&#x27;shish')
+        self.assertContains(response, 'Lokatsiyani ochish')
 
     def test_success_page_is_only_visible_to_owner(self):
         self.client.force_login(self.user)
@@ -64,35 +71,44 @@ class InvitationPrivacyTests(TestCase):
     def test_created_invitation_is_assigned_to_current_user(self):
         self.client.force_login(self.user)
         response = self.client.post(reverse('create_invitation'), {
-            'event_type': 'wedding',
-            'template_style': 'paper',
-            'title': 'New private invitation',
-            'hosts': 'New host',
+            'hosts': 'New hosts',
             'event_datetime': '2030-05-01T10:00',
             'venue_name': 'New venue',
             'venue_address': 'New address',
-            'message': 'Join us',
-            'reminder_hours': '24',
+            'venue_map_url': 'https://maps.app.goo.gl/example',
         })
         self.assertEqual(response.status_code, 302)
-        created = Invitation.objects.get(title='New private invitation')
+        created = Invitation.objects.get(venue_name='New venue')
         self.assertEqual(created.user, self.user)
+        self.assertEqual(created.hosts, 'New hosts')
+        self.assertEqual(created.event_type, 'wedding')
+        self.assertEqual(created.template_style, 'paper')
+        self.assertEqual(created.title, "To'y taklifnomasi")
+        self.assertEqual(created.message, Invitation._meta.get_field('message').default)
+        self.assertEqual(created.venue_map_url, 'https://maps.app.goo.gl/example')
 
     def test_owner_can_edit_invitation(self):
         edit_url = reverse('edit_invitation', args=[self.invitation.pk])
         self.client.force_login(self.user)
 
-        self.assertEqual(self.client.get(edit_url).status_code, 200)
+        page = self.client.get(edit_url)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'Ism va familiya')
+        for removed_section in (
+            'Tadbir turi va Dizayn',
+            'Ism va Sarlavha',
+            'Taklifnoma matni',
+            'Media va Qo&#x27;shimchalar',
+        ):
+            with self.subTest(section=removed_section):
+                self.assertNotContains(page, removed_section)
+
         response = self.client.post(edit_url, {
-            'event_type': 'wedding',
-            'template_style': 'paper',
-            'title': 'Updated celebration',
             'hosts': 'Updated hosts',
             'event_datetime': '2030-05-01T10:00',
             'venue_name': 'Updated venue',
             'venue_address': 'Updated address',
-            'message': 'Updated invitation',
-            'reminder_hours': '24',
+            'venue_map_url': 'https://maps.google.com/?q=Updated+venue',
         })
 
         self.assertRedirects(
@@ -100,8 +116,29 @@ class InvitationPrivacyTests(TestCase):
             reverse('invitation_detail', args=[self.invitation.pk]),
         )
         self.invitation.refresh_from_db()
-        self.assertEqual(self.invitation.title, 'Updated celebration')
+        self.assertEqual(self.invitation.title, 'Private celebration')
+        self.assertEqual(self.invitation.hosts, 'Updated hosts')
         self.assertEqual(self.invitation.venue_name, 'Updated venue')
+        self.assertEqual(self.invitation.venue_map_url, 'https://maps.google.com/?q=Updated+venue')
+
+    def test_map_link_is_used_on_public_invitation(self):
+        self.invitation.venue_map_url = 'https://maps.app.goo.gl/example'
+        self.invitation.save()
+
+        response = self.client.get(reverse('invitation_detail', args=[self.invitation.pk]))
+
+        self.assertContains(response, 'href="https://maps.app.goo.gl/example"')
+
+    def test_map_link_only_accepts_http_or_https_urls(self):
+        self.client.force_login(self.user)
+        response = self.client.post(reverse('create_invitation'), {
+            'venue_name': 'Unsafe map',
+            'venue_map_url': 'javascript:alert(1)',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Invitation.objects.filter(venue_name='Unsafe map').exists())
+        self.assertFormError(response.context['form'], 'venue_map_url', 'Enter a valid URL.')
 
     def test_only_invitation_owner_can_edit(self):
         edit_url = reverse('edit_invitation', args=[self.invitation.pk])
@@ -158,84 +195,35 @@ class InvitationPrivacyTests(TestCase):
         self.assertEqual(other_client.get(export_url).status_code, 404)
 
 
-class FileUploadValidationTests(TestCase):
+class RemovedInvitationFieldsTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testfile@gmail.com', email='testfile@gmail.com')
 
-    def test_invalid_file_upload_rejected(self):
+    def test_removed_fields_are_not_rendered_or_saved(self):
         self.client.force_login(self.user)
-        malicious_file = SimpleUploadedFile("shell.php", b"<?php system($_GET['cmd']); ?>", content_type="application/x-php")
-        response = self.client.post(reverse('create_invitation'), {
-            'event_type': 'wedding',
-            'template_style': 'paper',
-            'title': 'Hacker test',
-            'hosts': 'Hacker',
-            'event_datetime': '2030-05-01T10:00',
-            'venue_name': 'Venue',
-            'venue_address': 'Address',
-            'message': 'Test',
-            'reminder_hours': '24',
-            'cover_image': malicious_file,
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(
-            "Faqat rasm formatidagi" in response.content.decode('utf-8') or
-            "Upload a valid image" in response.content.decode('utf-8')
+        page = self.client.get(reverse('create_invitation'))
+        self.assertEqual(
+            set(page.context['form'].fields),
+            {'hosts', 'event_datetime', 'venue_name', 'venue_address', 'venue_map_url'},
         )
+        self.assertContains(page, 'venue-map-search-input')
+        self.assertContains(page, 'venue-map')
+        self.assertContains(page, 'nominatim.openstreetmap.org')
+        self.assertContains(page, 'maxNativeZoom: 15')
+        self.assertContains(page, 'type="hidden" name="venue_address"')
+        self.assertNotContains(page, 'Masalan: Toshkent shahri, Yunusobod tumani, Amir Temur ko&#x27;chasi')
 
-    def test_invalid_audio_file_rejected(self):
-        self.client.force_login(self.user)
-        malicious_file = SimpleUploadedFile("script.sh", b"rm -rf /", content_type="application/x-sh")
+        upload = SimpleUploadedFile("unused.txt", b"unused")
         response = self.client.post(reverse('create_invitation'), {
-            'event_type': 'wedding',
-            'template_style': 'paper',
-            'title': 'Hacker test',
-            'hosts': 'Hacker',
+            'hosts': 'Test couple',
             'event_datetime': '2030-05-01T10:00',
             'venue_name': 'Venue',
             'venue_address': 'Address',
-            'message': 'Test',
-            'reminder_hours': '24',
-            'audio_file': malicious_file,
+            'cover_image': upload,
         })
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Faqat MP3 yoki M4A formatidagi audio fayllar yuklanishi mumkin")
-
-    def test_m4a_audio_file_accepted(self):
-        self.client.force_login(self.user)
-        m4a_file = SimpleUploadedFile("audio.m4a", b"fake m4a audio content", content_type="audio/mp4")
-        response = self.client.post(reverse('create_invitation'), {
-            'event_type': 'wedding',
-            'template_style': 'paper',
-            'title': 'M4A Test',
-            'hosts': 'Hacker',
-            'event_datetime': '2030-05-01T10:00',
-            'venue_name': 'Venue',
-            'venue_address': 'Address',
-            'message': 'Test',
-            'reminder_hours': '24',
-            'audio_file': m4a_file,
-        }, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(Invitation.objects.filter(title='M4A Test').exists())
-
-    def test_invalid_video_file_rejected(self):
-        self.client.force_login(self.user)
-        malicious_file = SimpleUploadedFile("script.exe", b"MZ...", content_type="application/x-msdownload")
-        response = self.client.post(reverse('create_invitation'), {
-            'event_type': 'wedding',
-            'template_style': 'paper',
-            'title': 'Hacker test',
-            'hosts': 'Hacker',
-            'event_datetime': '2030-05-01T10:00',
-            'venue_name': 'Venue',
-            'venue_address': 'Address',
-            'message': 'Test',
-            'reminder_hours': '24',
-            'video_file': malicious_file,
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Faqat MP4 formatidagi video fayllar yuklanishi mumkin")
+        self.assertEqual(response.status_code, 302)
+        invitation = Invitation.objects.get(venue_name='Venue')
+        self.assertFalse(invitation.cover_image)
 
 
 class MediaServingTests(TestCase):

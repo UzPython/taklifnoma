@@ -172,21 +172,22 @@ def export_invitation_rsvps_view(request, pk):
 @login_required(login_url='login')
 @transaction.atomic
 def create_view(request):
-    initial = {}
-    style = request.GET.get('style')
-    if style in ['paper', 'royal', 'rose', 'video']:
-        initial['template_style'] = style
-
     if request.method == 'POST':
         form = InvitationForm(request.POST, request.FILES)
         if form.is_valid():
             invitation = form.save(commit=False)
             invitation.user = request.user
             invitation.owner_token = _get_owner_token(request)
+            if not invitation.event_datetime:
+                invitation.event_datetime = timezone.now() + timezone.timedelta(days=10)
+            if not invitation.venue_address:
+                invitation.venue_address = invitation.venue_name
+            if not invitation.title:
+                invitation.title = f"{invitation.hosts} — To'y taklifnomasi"
             invitation.save()
             return redirect('success_invitation', pk=invitation.pk)
     else:
-        form = InvitationForm(initial=initial)
+        form = InvitationForm()
     return render(request, 'lamp/create.html', {'form': form})
 
 
@@ -197,8 +198,15 @@ def edit_invitation_view(request, pk):
     if request.method == 'POST':
         form = InvitationForm(request.POST, request.FILES, instance=invitation)
         if form.is_valid():
-            form.save()
-            return redirect('invitation_detail', pk=invitation.pk)
+            inv = form.save(commit=False)
+            if not inv.event_datetime:
+                inv.event_datetime = timezone.now() + timezone.timedelta(days=10)
+            if not inv.venue_address:
+                inv.venue_address = inv.venue_name
+            if not inv.title:
+                inv.title = f"{inv.hosts} — To'y taklifnomasi"
+            inv.save()
+            return redirect('invitation_detail', pk=inv.pk)
     else:
         form = InvitationForm(instance=invitation)
     return render(request, 'lamp/create.html', {
