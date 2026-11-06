@@ -127,11 +127,76 @@
         text-align: left;
         backdrop-filter: blur(5px);
     }
+    .arch-card {
+        isolation: isolate;
+        background-clip: padding-box;
+        border-width: 2px;
+        box-shadow: 0 30px 70px rgba(0,0,0,.32), 0 0 0 8px rgba(255,255,255,.025);
+    }
+    .arch-header h1 {
+        line-height: 1.18;
+        overflow-wrap: anywhere;
+    }
+    .arch-card video {
+        max-height: 430px;
+        object-fit: cover;
+    }
+    .countdown-box {
+        border-color: rgba(212,175,55,.34);
+        background: rgba(0,0,0,.28);
+    }
+    .music-btn {
+        bottom: max(20px, env(safe-area-inset-bottom));
+        right: max(20px, env(safe-area-inset-right));
+        z-index: 1020;
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .music-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 9px 24px rgba(0,0,0,.36);
+    }
+    @media (max-width: 575.98px) {
+        .invitation-page {
+            padding: 24px 12px !important;
+        }
+        .arch-card {
+            padding: 42px 18px 28px;
+            border-top-left-radius: 112px;
+            border-top-right-radius: 112px;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+        .arch-header {
+            margin-top: 24px;
+            margin-bottom: 22px;
+        }
+        .arch-header h1 {
+            font-size: 1.65rem;
+        }
+        .couple-names {
+            font-size: clamp(1.75rem, 8vw, 2.3rem);
+            overflow-wrap: anywhere;
+        }
+        .countdown-box {
+            padding: 16px 10px;
+        }
+        .countdown-item {
+            font-size: 1.45rem;
+        }
+        .countdown-label {
+            font-size: .62rem;
+        }
+        .music-btn {
+            right: 12px;
+            bottom: 12px;
+            padding: 10px 15px;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-5 invitation-page">
     <!-- Background Music Audio element -->
     {% if invitation.audio_file %}
     <div class="text-center mb-3">

@@ -7,7 +7,17 @@ import urllib.parse
 from django.apps import AppConfig
 from django.conf import settings
 from django.core.cache import cache
+from django.db.backends.signals import connection_created
+from django.dispatch import receiver
 from lamp.middleware import ban_ip, unban_ip, get_banned_ips
+
+@receiver(connection_created)
+def configure_sqlite_connection(sender, connection, **kwargs):
+    if connection.vendor == 'sqlite':
+        cursor = connection.cursor()
+        cursor.execute('PRAGMA journal_mode=WAL;')
+        cursor.execute('PRAGMA synchronous=NORMAL;')
+        cursor.execute('PRAGMA busy_timeout=5000;')
 
 class LampConfig(AppConfig):
     name = "lamp"

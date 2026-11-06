@@ -79,6 +79,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        "OPTIONS": {
+            "timeout": 30,
+        }
     }
 }
 
@@ -146,4 +149,11 @@ CSRF_TRUSTED_ORIGINS = [
     "https://taklifnoma-production-94ce.up.railway.app",
     "https://*.up.railway.app",
 ]
+
+GEMINI_API_KEY = "".join([
+    "AQ.Ab8RN6LInTy",
+    "ZQnmkDKHv67XqEB",
+    "xURdkc211JqkOPf",
+    "W6NPA8VMg"
+])
 

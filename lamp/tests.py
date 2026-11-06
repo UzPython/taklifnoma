@@ -7,7 +7,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Invitation
+from .models import Invitation, RSVP
 
 
 class InvitationPrivacyTests(TestCase):
@@ -77,6 +77,85 @@ class InvitationPrivacyTests(TestCase):
         self.assertEqual(response.status_code, 302)
         created = Invitation.objects.get(title='New private invitation')
         self.assertEqual(created.user, self.user)
+
+    def test_owner_can_edit_invitation(self):
+        edit_url = reverse('edit_invitation', args=[self.invitation.pk])
+        self.client.force_login(self.user)
+
+        self.assertEqual(self.client.get(edit_url).status_code, 200)
+        response = self.client.post(edit_url, {
+            'event_type': 'wedding',
+            'template_style': 'paper',
+            'title': 'Updated celebration',
+            'hosts': 'Updated hosts',
+            'event_datetime': '2030-05-01T10:00',
+            'venue_name': 'Updated venue',
+            'venue_address': 'Updated address',
+            'message': 'Updated invitation',
+            'reminder_hours': '24',
+        })
+
+        self.assertRedirects(
+            response,
+            reverse('invitation_detail', args=[self.invitation.pk]),
+        )
+        self.invitation.refresh_from_db()
+        self.assertEqual(self.invitation.title, 'Updated celebration')
+        self.assertEqual(self.invitation.venue_name, 'Updated venue')
+
+    def test_only_invitation_owner_can_edit(self):
+        edit_url = reverse('edit_invitation', args=[self.invitation.pk])
+        self.client.force_login(self.other_user)
+
+        self.assertEqual(self.client.get(edit_url).status_code, 404)
+        self.assertEqual(self.client.post(edit_url, {}).status_code, 404)
+        self.invitation.refresh_from_db()
+        self.assertEqual(self.invitation.title, 'Private celebration')
+
+    def test_my_invitations_shows_rsvp_counts(self):
+        RSVP.objects.create(
+            invitation=self.invitation,
+            guest_name='Guest One',
+            attendance='yes',
+        )
+        RSVP.objects.create(
+            invitation=self.invitation,
+            guest_name='Guest Two',
+            attendance='maybe',
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('my_invitations'))
+
+        self.assertEqual(response.status_code, 200)
+        invitation = response.context['invitations'][0]
+        self.assertEqual(invitation.rsvp_total_count, 2)
+        self.assertEqual(invitation.rsvp_yes_count, 1)
+        self.assertEqual(invitation.rsvp_maybe_count, 1)
+        self.assertEqual(invitation.rsvp_no_count, 0)
+        self.assertContains(response, 'Mehmonlar javobi')
+
+    def test_rsvp_export_is_only_available_to_invitation_owner(self):
+        RSVP.objects.create(
+            invitation=self.invitation,
+            guest_name='Guest One',
+            attendance='yes',
+            wish_message='Bayramingiz muborak!',
+        )
+        export_url = reverse('export_invitation_rsvps', args=[self.invitation.pk])
+        self.client.force_login(self.user)
+
+        response = self.client.get(export_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/csv; charset=utf-8')
+        self.assertIn('private, no-store', response['Cache-Control'])
+        self.assertIn('Guest One', response.content.decode('utf-8-sig'))
+        self.assertIn('Bayramingiz muborak!', response.content.decode('utf-8-sig'))
+
+        other_client = self.client_class()
+        other_client.force_login(self.other_user)
+        self.assertEqual(other_client.get(export_url).status_code, 404)
 
 
 class FileUploadValidationTests(TestCase):

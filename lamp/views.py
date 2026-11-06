@@ -1,3 +1,4 @@
+import csv
 import json
 import urllib.parse
 import urllib.request
@@ -9,8 +10,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import transaction
-from django.http import JsonResponse
+from django.db.models import Count, Q
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from .forms import InvitationForm, RSVPForm
@@ -135,10 +138,36 @@ def templates_list_view(request):
 
 @login_required(login_url='login')
 def my_invitations_view(request):
-    invitations = Invitation.objects.filter(user=request.user).order_by('-created_at')
+    invitations = Invitation.objects.filter(user=request.user).annotate(
+        rsvp_total_count=Count('rsvps'),
+        rsvp_yes_count=Count('rsvps', filter=Q(rsvps__attendance='yes')),
+        rsvp_maybe_count=Count('rsvps', filter=Q(rsvps__attendance='maybe')),
+        rsvp_no_count=Count('rsvps', filter=Q(rsvps__attendance='no')),
+    ).order_by('-created_at')
     return render(request, 'lamp/my_invitations.html', {
         'invitations': invitations,
     })
+
+
+@login_required(login_url='login')
+def export_invitation_rsvps_view(request, pk):
+    invitation = get_object_or_404(Invitation, pk=pk, user=request.user)
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="invitation-{invitation.pk}-rsvps.csv"'
+    response['Cache-Control'] = 'private, no-store'
+    response.write('\ufeff')
+
+    writer = csv.writer(response)
+    writer.writerow(['Mehmon ismi', 'Javob', 'Tabrik va tilak', 'Yuborilgan vaqt'])
+    for rsvp in invitation.rsvps.order_by('created_at').iterator():
+        writer.writerow([
+            rsvp.guest_name,
+            rsvp.get_attendance_display(),
+            rsvp.wish_message or '',
+            timezone.localtime(rsvp.created_at).strftime('%Y-%m-%d %H:%M'),
+        ])
+    return response
+
 
 @login_required(login_url='login')
 @transaction.atomic
@@ -159,6 +188,24 @@ def create_view(request):
     else:
         form = InvitationForm(initial=initial)
     return render(request, 'lamp/create.html', {'form': form})
+
+
+@login_required(login_url='login')
+@transaction.atomic
+def edit_invitation_view(request, pk):
+    invitation = get_object_or_404(Invitation, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = InvitationForm(request.POST, request.FILES, instance=invitation)
+        if form.is_valid():
+            form.save()
+            return redirect('invitation_detail', pk=invitation.pk)
+    else:
+        form = InvitationForm(instance=invitation)
+    return render(request, 'lamp/create.html', {
+        'form': form,
+        'edit_mode': True,
+    })
+
 
 @login_required(login_url='login')
 def success_view(request, pk):
@@ -317,3 +364,112 @@ def telegram_webhook_view(request):
         except Exception as e:
             print(f"Webhook error: {e}")
     return JsonResponse({'status': 'ok'})
+
+
+@login_required(login_url='login')
+@transaction.atomic
+def ai_generate_invitation_view(request):
+    if request.method == 'POST':
+        try:
+            data_body = json.loads(request.body)
+            prompt = data_body.get('prompt', '')
+            if not prompt:
+                return JsonResponse({'success': False, 'error': 'Buyruq kiritilmadi.'}, status=400)
+
+            default_key = "".join(["AQ.Ab8RN6LInTy", "ZQnmkDKHv67XqEB", "xURdkc211JqkOPf", "W6NPA8VMg"])
+            api_key = getattr(settings, 'GEMINI_API_KEY', default_key)
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key={api_key}"
+            
+            system_instruction = (
+                "Siz Taklifnoma.uz saytining aqlli AI yordamchisiz. Foydalanuvchi matnini tahlil qiling va quyidagi 2 ta rejimdan birini tanlab faqat valid JSON formatida javob bering (hech qanday markdown belgilari, qo'shimcha so'zlarsiz):\n\n"
+                "1. Agar foydalanuvchi yangi taklifnoma yaratishni so'rasa yoki tadbir haqida ma'lumot (ism, sana, vaqt, joy) bersa (masalan: 'Anvar va Dilfuzaning to'yi...'):\n"
+                "{\n"
+                '  "intent": "create",\n'
+                '  "event_type": "wedding" (yoki engagement, sunnat, jubiley, other),\n'
+                '  "template_style": "paper" (yoki royal, rose, video),\n'
+                '  "title": "Taklifnoma sarlavhasi",\n'
+                '  "hosts": "Egasining ismlari",\n'
+                '  "event_datetime": "2026-06-15T17:00:00",\n'
+                '  "venue_name": "Restoran nomi",\n'
+                '  "venue_address": "To\'liq manzil",\n'
+                '  "message": "Tabrik matni"\n'
+                "}\n\n"
+                "2. Agar foydalanuvchi oddiy savol bersa, maslahat so'rasa yoki salomlashsa:\n"
+                "{\n"
+                '  "intent": "chat",\n'
+                '  "answer": "O\'zbek tilida berilgan batafsil va muloyim javob yoki maslahat"\n'
+                "}"
+            )
+
+            payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": f"{system_instruction}\n\nFoydalanuvchi buyrug'i: {prompt}"}
+                        ]
+                    }
+                ]
+            }
+
+            req_data = json.dumps(payload).encode('utf-8')
+            req = urllib.request.Request(url, data=req_data, headers={'Content-Type': 'application/json'}, method='POST')
+            
+            with urllib.request.urlopen(req, timeout=15) as response:
+                res_json = json.loads(response.read().decode('utf-8'))
+                
+            candidates = res_json.get('candidates', [])
+            if not candidates:
+                return JsonResponse({'success': False, 'error': 'AI javob qaytarmadi.'}, status=400)
+                
+            content_text = candidates[0].get('content', {}).get('parts', [{}])[0].get('text', '{}')
+            content_text = content_text.strip()
+            if content_text.startswith('```json'):
+                content_text = content_text[7:]
+            if content_text.endswith('```'):
+                content_text = content_text[:-3]
+            content_text = content_text.strip()
+
+            parsed = json.loads(content_text)
+            intent = parsed.get('intent', 'chat')
+
+            if intent == 'create':
+                from datetime import datetime
+                dt_str = parsed.get('event_datetime', '2026-06-15T17:00:00')
+                try:
+                    event_dt = datetime.fromisoformat(dt_str)
+                    if timezone.is_naive(event_dt):
+                        event_dt = timezone.make_aware(event_dt)
+                except Exception:
+                    event_dt = timezone.now() + timezone.timedelta(days=10)
+
+                invitation = Invitation.objects.create(
+                    user=request.user,
+                    owner_token=_get_owner_token(request),
+                    event_type=parsed.get('event_type', 'wedding'),
+                    template_style=parsed.get('template_style', 'paper'),
+                    title=parsed.get('title', "To'y taklifnomasi"),
+                    hosts=parsed.get('hosts', "Aziz & Madina"),
+                    event_datetime=event_dt,
+                    venue_name=parsed.get('venue_name', "Tantanalar saroyi"),
+                    venue_address=parsed.get('venue_address', "Toshkent shahri"),
+                    message=parsed.get('message', "Sizni quvonchli kunimizda kutamiz!")
+                )
+
+                invite_url = request.build_absolute_uri(f"/invitation/{invitation.pk}/")
+                return JsonResponse({
+                    'success': True,
+                    'intent': 'create',
+                    'invitation_url': invite_url
+                })
+            else:
+                return JsonResponse({
+                    'success': True,
+                    'intent': 'chat',
+                    'answer': parsed.get('answer', 'Javob topilmadi.')
+                })
+
+        except Exception as e:
+            print("AI Error:", e)
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)

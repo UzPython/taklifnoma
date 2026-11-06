@@ -20,8 +20,8 @@ class Invitation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True, related_name='invitations')
     owner_token = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
-    event_type = models.CharField(max_length=50, choices=EVENT_TYPES, default='wedding', verbose_name="Tadbir turi")
-    template_style = models.CharField(max_length=20, choices=TEMPLATE_CHOICES, default='paper', verbose_name="Taklifnoma dizayni")
+    event_type = models.CharField(max_length=50, choices=EVENT_TYPES, default='wedding', verbose_name="Tadbir turi", db_index=True)
+    template_style = models.CharField(max_length=20, choices=TEMPLATE_CHOICES, default='paper', verbose_name="Taklifnoma dizayni", db_index=True)
     title = models.CharField(max_length=200, default="To'y taklifnomasi", verbose_name="Taklifnoma sarlavhasi")
     hosts = models.CharField(max_length=250, verbose_name="Egasining ismlari (masalan: Anvar & Gulnora)")
     guest_name = models.TextField(blank=True, null=True, verbose_name="Mehmonlar ismi (ixtiyoriy)")
@@ -35,7 +35,7 @@ class Invitation(models.Model):
     
     reminder_hours = models.PositiveIntegerField(default=24, verbose_name="Necha soat oldin eslatish (soatda)")
     likes_count = models.PositiveIntegerField(default=0, verbose_name="Yoqtirishlar soni")
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     @property
     def yes_rsvp_count(self):
@@ -61,9 +61,9 @@ class RSVP(models.Model):
     ]
     invitation = models.ForeignKey(Invitation, on_delete=models.CASCADE, related_name='rsvps')
     guest_name = models.CharField(max_length=200, verbose_name="Ismingiz")
-    attendance = models.CharField(max_length=20, choices=ATTENDANCE_CHOICES, default='yes', verbose_name="Ishtirok etishingiz")
+    attendance = models.CharField(max_length=20, choices=ATTENDANCE_CHOICES, default='yes', verbose_name="Ishtirok etishingiz", db_index=True)
     wish_message = models.TextField(blank=True, null=True, verbose_name="Tabrik va tilaklaringiz")
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def __str__(self):
         return f"{self.guest_name} - {self.get_attendance_display()}"
@@ -72,8 +72,8 @@ class RSVP(models.Model):
 class Like(models.Model):
     invitation = models.ForeignKey(Invitation, on_delete=models.CASCADE, related_name='likes')
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
-    session_key = models.CharField(max_length=255, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    session_key = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def __str__(self):
         return f"Like on {self.invitation} by {self.user or self.session_key}"

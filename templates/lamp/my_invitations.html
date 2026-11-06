@@ -274,9 +274,26 @@
                         <div class="mb-2"><i class="fa-regular fa-calendar me-2 text-warning"></i>{{ invitation.event_datetime|date:"d.m.Y, H:i" }}</div>
                         <div><i class="fa-solid fa-location-dot me-2 text-warning"></i>{{ invitation.venue_name }}</div>
                     </div>
+                    <div class="rounded-3 border p-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-semibold small"><i class="fa-solid fa-users me-2 text-warning"></i>Mehmonlar javobi</span>
+                            <span class="badge rounded-pill text-bg-light border">{{ invitation.rsvp_total_count }} ta</span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 small">
+                            <span class="text-success"><i class="fa-solid fa-check me-1"></i>{{ invitation.rsvp_yes_count }} keladi</span>
+                            <span class="text-warning"><i class="fa-solid fa-question me-1"></i>{{ invitation.rsvp_maybe_count }} balki</span>
+                            <span class="text-danger"><i class="fa-solid fa-xmark me-1"></i>{{ invitation.rsvp_no_count }} kelolmaydi</span>
+                        </div>
+                    </div>
                     <div class="mt-auto d-grid gap-2">
                         <a href="{% url 'invitation_detail' invitation.pk %}" class="btn btn-dark rounded-pill py-2 invitation-action">
                             <i class="fa-regular fa-eye me-2"></i>Taklifnomani ko‘rish
+                        </a>
+                        <a href="{% url 'edit_invitation' invitation.pk %}" class="btn btn-outline-secondary rounded-pill py-2 invitation-action">
+                            <i class="fa-solid fa-pen-to-square me-2"></i>Taklifnomani tahrirlash
+                        </a>
+                        <a href="{% url 'export_invitation_rsvps' invitation.pk %}" class="btn btn-outline-success rounded-pill py-2 invitation-action">
+                            <i class="fa-solid fa-file-csv me-2"></i>Mehmonlar ro‘yxatini yuklab olish
                         </a>
                         <button type="button" class="btn btn-outline-primary rounded-pill py-2 invitation-action copy-invitation-link"
                                 data-invitation-url="{{ request.scheme }}://{{ request.get_host }}{% url 'invitation_detail' invitation.pk %}">

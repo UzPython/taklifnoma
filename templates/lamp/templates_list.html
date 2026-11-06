@@ -2,133 +2,297 @@
 
 {% block title %}Taklifnoma shablonlari - Taklifnoma.uz{% endblock %}
 
+{% block extra_head %}
+<style>
+    .catalog-header {
+        position: relative;
+        overflow: hidden;
+        padding: clamp(32px, 5vw, 58px);
+        border-radius: 28px;
+        color: #fff;
+        background:
+            radial-gradient(circle at 88% 8%, rgba(211,174,105,.23), transparent 16rem),
+            linear-gradient(125deg, #14291f, #294633);
+    }
+    .catalog-header h1 {
+        max-width: 700px;
+        font-size: clamp(2.2rem, 5vw, 3.6rem);
+        line-height: 1.08;
+    }
+    .catalog-header p {
+        max-width: 620px;
+        color: rgba(255,255,255,.72);
+        line-height: 1.8;
+    }
+    .catalog-kicker {
+        color: #dfc58e;
+        font-size: .75rem;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+    }
+    .catalog-card {
+        overflow: hidden;
+        border: 1px solid var(--surface-border);
+        border-radius: 22px;
+        background: var(--card-bg);
+        box-shadow: 0 12px 30px rgba(20,30,22,.06);
+        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    .catalog-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(179,144,82,.35);
+        box-shadow: 0 22px 44px rgba(20,30,22,.12);
+    }
+    .template-art {
+        display: grid;
+        min-height: 300px;
+        place-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+    .template-art::before,
+    .template-art::after {
+        position: absolute;
+        content: "";
+        border: 1px solid currentColor;
+        border-radius: 50%;
+        opacity: .14;
+    }
+    .template-art::before {
+        width: 280px;
+        height: 280px;
+        right: -130px;
+        top: -150px;
+    }
+    .template-art::after {
+        width: 210px;
+        height: 210px;
+        left: -100px;
+        bottom: -130px;
+    }
+    .template-art.paper {
+        color: #715e3d;
+        background: linear-gradient(145deg, #f8f3e8, #e6dac1);
+    }
+    .template-art.video {
+        color: #fff;
+        background: linear-gradient(145deg, #253950, #697d99);
+    }
+    .template-art.royal {
+        color: #ead5a9;
+        background: linear-gradient(145deg, #111712, #30382e);
+    }
+    .template-art.rose {
+        color: #9c4956;
+        background: linear-gradient(145deg, #fff4f0, #e9b9b3);
+    }
+    .art-invite {
+        position: relative;
+        display: flex;
+        width: 190px;
+        min-height: 250px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        border: 1px solid currentColor;
+        border-radius: 100px 100px 18px 18px;
+        background: rgba(255,255,255,.76);
+        box-shadow: 0 20px 42px rgba(31,35,26,.2);
+        text-align: center;
+        transform: rotate(-3deg);
+    }
+    .video .art-invite {
+        background: linear-gradient(145deg, rgba(28,38,53,.86), rgba(71,87,108,.9));
+        box-shadow: 0 20px 42px rgba(13,20,31,.3);
+    }
+    .royal .art-invite {
+        background: linear-gradient(145deg, #141914, #252b23);
+        box-shadow: 0 20px 42px rgba(0,0,0,.35);
+    }
+    .art-symbol {
+        margin-bottom: 20px;
+        font-size: 1.7rem;
+    }
+    .art-caption {
+        font-size: .62rem;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+        opacity: .8;
+    }
+    .art-title {
+        margin: 12px 0;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.25rem;
+        font-style: italic;
+        line-height: 1.2;
+    }
+    .art-divider {
+        width: 46px;
+        height: 1px;
+        margin: 6px 0 14px;
+        background: currentColor;
+        opacity: .5;
+    }
+    .art-detail {
+        font-size: .58rem;
+        letter-spacing: .1em;
+        opacity: .75;
+    }
+    .catalog-card .card-body {
+        display: flex;
+        flex-direction: column;
+        padding: 24px;
+    }
+    .catalog-card h2 {
+        color: var(--text-color);
+    }
+    .catalog-card p {
+        color: var(--muted-color);
+        line-height: 1.7;
+    }
+    .style-tag {
+        align-self: flex-start;
+        padding: 6px 10px;
+        border-radius: 999px;
+        color: #67785d;
+        background: rgba(124,145,98,.12);
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+    }
+    .catalog-cta {
+        margin-top: auto;
+        color: #243a2b;
+        background: #e8d8b5;
+        border: 0;
+    }
+    .catalog-cta:hover {
+        color: #243a2b;
+        background: #dfc58e;
+        transform: translateY(-1px);
+    }
+    @media (max-width: 575.98px) {
+        .catalog-header {
+            border-radius: 22px;
+        }
+        .template-art {
+            min-height: 260px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-semibold mb-2">
-            <i class="fa-solid fa-gem me-1"></i> Eksklyuziv Kolleksiya
-        </span>
-        <h1 class="playfair fw-bold display-5 mb-3">Taklifnoma shablonlari</h1>
-        <p class="text-muted col-lg-7 mx-auto lead fs-6">
-            To'y va tantanali tadbirlaringiz uchun o'zingizga yoqqan shablonni tanlang va bepul yarating. Ochilish animatsiyasi, fon musiqasi, lokatsiya va RSVP xususiyatlari birikkan.
-        </p>
+<div class="container py-4 py-lg-5">
+    <header class="catalog-header mb-5">
+        <div class="catalog-kicker mb-3"><i class="fa-solid fa-sparkles me-2"></i>Did bilan tanlangan</div>
+        <h1 class="playfair fw-bold mb-3">Bayramingizga mos uslubni toping</h1>
+        <p class="mb-0">Har bir taklifnoma telefonda chiroyli ko‘rinadi va ulashishga tayyor. O‘zingizga yoqqan dizaynni tanlab, tafsilotlarni kiriting.</p>
+    </header>
+
+    <div class="d-flex flex-column flex-sm-row align-items-sm-end justify-content-between gap-2 mb-4">
+        <div>
+            <div class="catalog-kicker mb-2">Taklifnomalar to‘plami</div>
+            <h2 class="playfair fw-bold mb-0">O‘zingizga mosini tanlang</h2>
+        </div>
+        <span class="small text-muted">4 xil dizayn · Tahrirlash oson</span>
     </div>
 
     <div class="row g-4">
-        <!-- Template 1: The Sacred Garden -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden template-card">
-                <div class="template-mockup bg-light p-4 text-center position-relative" style="background: linear-gradient(135deg, #fdfbf7 0%, #e2d9c5 100%); min-height: 320px; display: flex; align-items: center; justify-content: center;">
-                    <div class="phone-frame shadow-lg bg-white rounded-5 p-2 border border-4 border-dark" style="width: 170px; height: 280px; position: relative;">
-                        <div class="notch bg-dark rounded-pill mx-auto mb-2" style="width: 60px; height: 12px;"></div>
-                        <div class="screen bg-white rounded-4 p-3 d-flex flex-column justify-content-between h-85 text-center" style="background: radial-gradient(circle, #fff 0%, #f4efe6 100%);">
-                            <div class="small fw-bold text-uppercase" style="font-size: 0.6rem; color: #b8860b;">Nikoh To'yi</div>
-                            <div class="playfair fst-italic fw-bold text-dark" style="font-size: 0.85rem;">The Sacred Garden</div>
-                            <div class="badge bg-danger text-white rounded-pill p-1 mx-auto" style="font-size: 0.5rem;"><i class="fa-solid fa-stamp"></i> Vaqti keldi</div>
-                        </div>
+        <div class="col-md-6 col-xl-3">
+            <article class="catalog-card h-100">
+                <div class="template-art paper">
+                    <div class="art-invite">
+                        <div class="art-symbol"><i class="fa-solid fa-leaf"></i></div>
+                        <div class="art-caption">Sizni taklif qilamiz</div>
+                        <div class="art-title">The Sacred<br>Garden</div>
+                        <div class="art-divider"></div>
+                        <div class="art-detail">NAFIS VA MUMTOZ</div>
                     </div>
                 </div>
-                <div class="card-body p-4 d-flex flex-column justify-content-between">
-                    <div>
-                        <h3 class="h5 fw-bold playfair mb-2">The Sacred Garden</h3>
-                        <p class="text-muted small mb-3">Klassik oqshom va tabiat naqshlari uyg'unlashgan nafis qog'oz dizayn.</p>
-                    </div>
-                    <a href="{% url 'create_invitation' %}?style=paper" class="btn btn-outline-dark btn-sm fw-bold rounded-pill py-2 d-flex justify-content-between align-items-center px-3">
-                        <span>Onlayn-taklifnoma</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+                <div class="card-body">
+                    <span class="style-tag mb-3">MUMTOZ</span>
+                    <h2 class="h5 fw-bold playfair mb-2">The Sacred Garden</h2>
+                    <p class="small mb-4">Oq va oltin tuslar, nafis bezaklar va an’anaviy kayfiyat.</p>
+                    <a href="{% url 'create_invitation' %}?style=paper" class="btn catalog-cta rounded-pill fw-bold py-2 px-3">
+                        Shu dizaynni tanlash <i class="fa-solid fa-arrow-right ms-2"></i>
                     </a>
                 </div>
-            </div>
+            </article>
         </div>
-
-        <!-- Template 2: Italian Villa -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden template-card">
-                <div class="template-mockup bg-light p-4 text-center position-relative" style="background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%); min-height: 320px; display: flex; align-items: center; justify-content: center;">
-                    <div class="phone-frame shadow-lg bg-white rounded-5 p-2 border border-4 border-dark" style="width: 170px; height: 280px; position: relative;">
-                        <div class="notch bg-dark rounded-pill mx-auto mb-2" style="width: 60px; height: 12px;"></div>
-                        <div class="screen bg-white rounded-4 p-3 d-flex flex-column justify-content-between h-85 text-center" style="background: radial-gradient(circle, #fff 0%, #e0f2fe 100%);">
-                            <div class="small fw-bold text-uppercase" style="font-size: 0.6rem; color: #0284c7;">Fotiha To'yi</div>
-                            <div class="playfair fst-italic fw-bold text-dark" style="font-size: 0.85rem;">Italian Villa</div>
-                            <div class="badge bg-primary text-white rounded-pill p-1 mx-auto" style="font-size: 0.5rem;"><i class="fa-solid fa-ring"></i> Sevgi va hurmat</div>
-                        </div>
+        <div class="col-md-6 col-xl-3">
+            <article class="catalog-card h-100">
+                <div class="template-art video">
+                    <div class="art-invite">
+                        <div class="art-symbol"><i class="fa-solid fa-play"></i></div>
+                        <div class="art-caption">Harakatdagi xotira</div>
+                        <div class="art-title">Cinematic<br>Moments</div>
+                        <div class="art-divider"></div>
+                        <div class="art-detail">VIDEO TAKLIFNOMA</div>
                     </div>
                 </div>
-                <div class="card-body p-4 d-flex flex-column justify-content-between">
-                    <div>
-                        <h3 class="h5 fw-bold playfair mb-2">Italian Villa</h3>
-                        <p class="text-muted small mb-3">Moviy va oq ranglardagi sovuq, zamonaviy va yengil dizayn uslubi.</p>
-                    </div>
-                    <a href="{% url 'create_invitation' %}?style=rose" class="btn btn-outline-dark btn-sm fw-bold rounded-pill py-2 d-flex justify-content-between align-items-center px-3">
-                        <span>Onlayn-taklifnoma</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+                <div class="card-body">
+                    <span class="style-tag mb-3">VIDEO</span>
+                    <h2 class="h5 fw-bold playfair mb-2">Cinematic Moments</h2>
+                    <p class="small mb-4">O‘z videongiz bilan bayram kayfiyatini birinchi qarashdayoq ulashing.</p>
+                    <a href="{% url 'create_invitation' %}?style=video" class="btn catalog-cta rounded-pill fw-bold py-2 px-3">
+                        Shu dizaynni tanlash <i class="fa-solid fa-arrow-right ms-2"></i>
                     </a>
                 </div>
-            </div>
+            </article>
         </div>
-
-        <!-- Template 3: Royal Night -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden template-card">
-                <div class="template-mockup bg-light p-4 text-center position-relative" style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%); min-height: 320px; display: flex; align-items: center; justify-content: center;">
-                    <div class="phone-frame shadow-lg bg-dark rounded-5 p-2 border border-4 border-warning" style="width: 170px; height: 280px; position: relative;">
-                        <div class="notch bg-secondary rounded-pill mx-auto mb-2" style="width: 60px; height: 12px;"></div>
-                        <div class="screen rounded-4 p-3 d-flex flex-column justify-content-between h-85 text-center text-white" style="background: #0b0f19;">
-                            <div class="small fw-bold text-uppercase text-warning" style="font-size: 0.6rem;">Qirollik Kechasi</div>
-                            <div class="playfair fst-italic fw-bold text-warning" style="font-size: 0.85rem;">Royal Night</div>
-                            <div class="badge bg-warning text-dark rounded-pill p-1 mx-auto" style="font-size: 0.5rem;"><i class="fa-solid fa-crown"></i> Oltin bezak</div>
-                        </div>
+        <div class="col-md-6 col-xl-3">
+            <article class="catalog-card h-100">
+                <div class="template-art royal">
+                    <div class="art-invite">
+                        <div class="art-symbol"><i class="fa-solid fa-crown"></i></div>
+                        <div class="art-caption">Maxsus taklif</div>
+                        <div class="art-title">Royal<br>Evening</div>
+                        <div class="art-divider"></div>
+                        <div class="art-detail">OLTIN VA HASHAMAT</div>
                     </div>
                 </div>
-                <div class="card-body p-4 d-flex flex-column justify-content-between">
-                    <div>
-                        <h3 class="h5 fw-bold playfair mb-2">Royal Night</h3>
-                        <p class="text-muted small mb-3">To'q qora va oltin rangli hashamatli kechalar uchun eng mukammal tanlov.</p>
-                    </div>
-                    <a href="{% url 'create_invitation' %}?style=royal" class="btn btn-outline-dark btn-sm fw-bold rounded-pill py-2 d-flex justify-content-between align-items-center px-3">
-                        <span>Onlayn-taklifnoma</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+                <div class="card-body">
+                    <span class="style-tag mb-3">HASHAMATLI</span>
+                    <h2 class="h5 fw-bold playfair mb-2">Royal Night</h2>
+                    <p class="small mb-4">To‘q ranglar va oltin aksentlar bilan tantanali, salobatli ko‘rinish.</p>
+                    <a href="{% url 'create_invitation' %}?style=royal" class="btn catalog-cta rounded-pill fw-bold py-2 px-3">
+                        Shu dizaynni tanlash <i class="fa-solid fa-arrow-right ms-2"></i>
                     </a>
                 </div>
-            </div>
+            </article>
         </div>
-
-        <!-- Template 4: Ruby Elegance -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden template-card">
-                <div class="template-mockup bg-light p-4 text-center position-relative" style="background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); min-height: 320px; display: flex; align-items: center; justify-content: center;">
-                    <div class="phone-frame shadow-lg bg-white rounded-5 p-2 border border-4 border-danger" style="width: 170px; height: 280px; position: relative;">
-                        <div class="notch bg-dark rounded-pill mx-auto mb-2" style="width: 60px; height: 12px;"></div>
-                        <div class="screen rounded-4 p-3 d-flex flex-column justify-content-between h-85 text-center" style="background: radial-gradient(circle, #fff 0%, #ffe4e6 100%);">
-                            <div class="small fw-bold text-uppercase text-danger" style="font-size: 0.6rem;">Nozik Atirgul</div>
-                            <div class="playfair fst-italic fw-bold text-danger" style="font-size: 0.85rem;">Ruby Elegance</div>
-                            <div class="badge bg-danger text-white rounded-pill p-1 mx-auto" style="font-size: 0.5rem;"><i class="fa-solid fa-heart"></i> Sevgi ramzi</div>
-                        </div>
+        <div class="col-md-6 col-xl-3">
+            <article class="catalog-card h-100">
+                <div class="template-art rose">
+                    <div class="art-invite">
+                        <div class="art-symbol"><i class="fa-solid fa-heart"></i></div>
+                        <div class="art-caption">Mehr bilan</div>
+                        <div class="art-title">Ruby<br>Elegance</div>
+                        <div class="art-divider"></div>
+                        <div class="art-detail">NOZIK VA ROMANTIK</div>
                     </div>
                 </div>
-                <div class="card-body p-4 d-flex flex-column justify-content-between">
-                    <div>
-                        <h3 class="h5 fw-bold playfair mb-2">Ruby Elegance</h3>
-                        <p class="text-muted small mb-3">Pushti va qizil atirgul naqshlari bilan bezatilgan iliq va romantik dizayn.</p>
-                    </div>
-                    <a href="{% url 'create_invitation' %}?style=rose" class="btn btn-outline-dark btn-sm fw-bold rounded-pill py-2 d-flex justify-content-between align-items-center px-3">
-                        <span>Onlayn-taklifnoma</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+                <div class="card-body">
+                    <span class="style-tag mb-3">ROMANTIK</span>
+                    <h2 class="h5 fw-bold playfair mb-2">Ruby Elegance</h2>
+                    <p class="small mb-4">Atirgul ranglari va yumshoq tuslarda iliq, samimiy taklifnoma.</p>
+                    <a href="{% url 'create_invitation' %}?style=rose" class="btn catalog-cta rounded-pill fw-bold py-2 px-3">
+                        Shu dizaynni tanlash <i class="fa-solid fa-arrow-right ms-2"></i>
                     </a>
                 </div>
-            </div>
+            </article>
         </div>
     </div>
 
+    <div class="text-center mt-5">
+        <p class="text-muted mb-3">Boshqa g‘oyangiz bormi? Taklifnomani o‘z rasmingiz va musiqangiz bilan bezang.</p>
+        <a href="{% url 'create_invitation' %}" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fa-solid fa-plus me-2"></i>Bo‘sh taklifnomadan boshlash
+        </a>
+    </div>
 </div>
-
-<style>
-    .template-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .template-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 1rem 3rem rgba(0,0,0,.15) !important;
-    }
-</style>
 {% endblock %}

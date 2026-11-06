@@ -8,7 +8,9 @@ urlpatterns = [
     path('create/', views.create_view, name='create_invitation'),
     path('success/<uuid:pk>/', views.success_view, name='success_invitation'),
     path('invitation/<uuid:pk>/', views.invitation_detail_view, name='invitation_detail'),
+    path('invitation/<uuid:pk>/edit/', views.edit_invitation_view, name='edit_invitation'),
     path('invitation/<uuid:pk>/delete/', views.delete_invitation_view, name='delete_invitation'),
+    path('invitation/<uuid:pk>/rsvps.csv', views.export_invitation_rsvps_view, name='export_invitation_rsvps'),
     path('invitation/<uuid:pk>/like/', views.like_invitation, name='like_invitation'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
@@ -16,4 +18,5 @@ urlpatterns = [
     path('auth/google', views.google_auth_callback_view),
     path('auth/google/redirect/', views.google_login_redirect_view, name='google_redirect'),
     path('telegram/webhook/', views.telegram_webhook_view, name='telegram_webhook'),
+    path('ai-generate/', views.ai_generate_invitation_view, name='ai_generate_invitation'),
 ]
