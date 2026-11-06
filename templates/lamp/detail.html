@@ -199,10 +199,23 @@
 <div class="container py-5 invitation-page">
     <!-- Background Music Audio element -->
     {% if invitation.audio_file %}
-    <div class="text-center mb-3">
-        <audio id="bgAudio" loop preload="auto" controls src="{{ invitation.audio_file.url }}" style="display: inline-block; width: 100%; max-width: 280px; accent-color: #c99a45;"></audio>
+    <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center gap-3 px-4 py-2 rounded-pill shadow-lg text-white border border-warning border-opacity-50" style="backdrop-filter: blur(12px); background: rgba(15, 28, 22, 0.9) !important;">
+            <button id="pillPlayBtn" class="btn btn-warning rounded-circle d-flex align-items-center justify-content-center text-dark fw-bold shadow-sm" style="width: 42px; height: 42px; font-size: 16px;" onclick="toggleMusic()">
+                <i class="fa-solid fa-play" id="pillPlayIcon"></i>
+            </button>
+            <div class="text-start" style="min-width: 110px;">
+                <div class="small fw-bold text-warning mb-0" style="font-size: 12px; letter-spacing: 0.5px;"><i class="fa-solid fa-music me-1"></i> Fon musiqasi</div>
+                <div class="text-muted" style="font-size: 11px;" id="audioTimeDisplay">0:00 / 0:00</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-volume-high text-warning small"></i>
+                <input type="range" id="audioVolume" min="0" max="1" step="0.05" value="1" style="width: 55px; accent-color: #d3ae69;" oninput="changeVolume(this.value)">
+            </div>
+        </div>
+        <audio id="bgAudio" loop preload="auto" src="{{ invitation.audio_file.url }}"></audio>
     </div>
-    <button class="music-btn" id="musicToggle" onclick="toggleMusic()">
+    <button class="music-btn d-none" id="musicToggle" onclick="toggleMusic()">
         <i class="fa-solid fa-music" id="musicIcon"></i> <span id="musicText">Musiqani yoqish</span>
     </button>
     {% endif %}
@@ -241,11 +254,18 @@
 
         <!-- Video Uploaded Player if exists -->
         {% if invitation.video_file %}
-        <div class="my-4">
-            <video class="w-100 rounded-3 shadow" controls>
-                <source src="{{ invitation.video_file.url }}" type="video/mp4">
-                Sizning brauzeringiz videoni qo'llab-quvvatlamaydi.
-            </video>
+        <div class="my-4 text-center">
+            <div class="mb-2">
+                <span class="badge bg-dark text-warning border border-warning border-opacity-50 px-3 py-2 rounded-pill small fw-semibold shadow-sm">
+                    <i class="fa-solid fa-video me-1"></i> Video Xotira
+                </span>
+            </div>
+            <div class="position-relative overflow-hidden rounded-4 shadow-lg border border-warning border-opacity-50 bg-black mx-auto" style="max-width: 560px; box-shadow: 0 25px 60px rgba(0,0,0,0.65), 0 0 25px rgba(211,174,105,0.25) !important;">
+                <video class="w-100 d-block rounded-4" controls preload="metadata" playsinline style="max-height: 480px; object-fit: contain; background: #000;">
+                    <source src="{{ invitation.video_file.url }}" type="video/mp4">
+                    Sizning brauzeringiz videoni qo'llab-quvvatlamaydi.
+                </video>
+            </div>
         </div>
         {% endif %}
 
@@ -511,39 +531,118 @@
 
     function toggleMusic() {
         const audio = document.getElementById("bgAudio");
+        const playIcon = document.getElementById("pillPlayIcon");
         const icon = document.getElementById("musicIcon");
         const text = document.getElementById("musicText");
 
         if (audio.paused) {
             audio.play().then(() => {
-                icon.className = "fa-solid fa-pause";
-                text.innerText = "Musiqani to'xtatish";
+                if (playIcon) playIcon.className = "fa-solid fa-pause";
+                if (icon) icon.className = "fa-solid fa-pause";
+                if (text) text.innerText = "Musiqani to'xtatish";
             }).catch(error => {
                 console.error("Audio play failed:", error);
             });
         } else {
             audio.pause();
-            icon.className = "fa-solid fa-music";
-            text.innerText = "Musiqani yoqish";
+            if (playIcon) playIcon.className = "fa-solid fa-play";
+            if (icon) icon.className = "fa-solid fa-music";
+            if (text) text.innerText = "Musiqani yoqish";
         }
     }
 
-    // Keep UI in sync if user uses native audio controls
+    function changeVolume(val) {
+        const audio = document.getElementById("bgAudio");
+        if (audio) {
+            audio.volume = val;
+        }
+    }
+
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // Keep UI in sync if user uses audio controls
     document.addEventListener('DOMContentLoaded', () => {
         const audio = document.getElementById("bgAudio");
         if (audio) {
+            audio.addEventListener('timeupdate', () => {
+                const cur = formatTime(audio.currentTime);
+                const dur = formatTime(audio.duration || 0);
+                const timeDisp = document.getElementById("audioTimeDisplay");
+                if (timeDisp) timeDisp.innerText = `${cur} / ${dur}`;
+            });
+
             audio.addEventListener('play', () => {
+                const playIcon = document.getElementById("pillPlayIcon");
                 const icon = document.getElementById("musicIcon");
                 const text = document.getElementById("musicText");
+                if (playIcon) playIcon.className = "fa-solid fa-pause";
                 if (icon) icon.className = "fa-solid fa-pause";
                 if (text) text.innerText = "Musiqani to'xtatish";
             });
             audio.addEventListener('pause', () => {
+                const playIcon = document.getElementById("pillPlayIcon");
                 const icon = document.getElementById("musicIcon");
                 const text = document.getElementById("musicText");
+                if (playIcon) playIcon.className = "fa-solid fa-play";
                 if (icon) icon.className = "fa-solid fa-music";
                 if (text) text.innerText = "Musiqani yoqish";
             });
+        }
+
+        // Custom Video Player Controller
+        const video = document.getElementById("customVideo");
+        if (video) {
+            const playIcon = document.getElementById("videoPlayIcon");
+            const progressBar = document.getElementById("videoProgressBar");
+            const progressContainer = document.getElementById("videoProgressContainer");
+            const timeDisplay = document.getElementById("videoTimeDisplay");
+
+            window.toggleCustomVideo = function() {
+                if (video.paused) {
+                    video.play();
+                    playIcon.className = "fa-solid fa-pause";
+                } else {
+                    video.pause();
+                    playIcon.className = "fa-solid fa-play";
+                }
+            };
+
+            video.addEventListener('timeupdate', () => {
+                const current = video.currentTime;
+                const duration = video.duration || 1;
+                const percent = (current / duration) * 100;
+                progressBar.style.width = percent + "%";
+                timeDisplay.innerText = `${formatTime(current)} / ${formatTime(duration)}`;
+            });
+
+            video.addEventListener('ended', () => {
+                playIcon.className = "fa-solid fa-play";
+            });
+
+            progressContainer.addEventListener('click', (e) => {
+                const rect = progressContainer.getBoundingClientRect();
+                const pos = (e.clientX - rect.left) / rect.width;
+                video.currentTime = pos * video.duration;
+            });
+
+            window.toggleVideoMute = function() {
+                video.muted = !video.muted;
+                const muteIcon = document.getElementById("videoMuteIcon");
+                muteIcon.className = video.muted ? "fa-solid fa-volume-xmark text-danger" : "fa-solid fa-volume-high";
+            };
+
+            window.toggleVideoFullscreen = function() {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                }
+            };
         }
     });
 </script>
