@@ -260,11 +260,41 @@
                     <i class="fa-solid fa-video me-1"></i> Video Xotira
                 </span>
             </div>
-            <div class="position-relative overflow-hidden rounded-4 shadow-lg border border-warning border-opacity-50 bg-black mx-auto" style="max-width: 560px; box-shadow: 0 25px 60px rgba(0,0,0,0.65), 0 0 25px rgba(211,174,105,0.25) !important;">
-                <video class="w-100 d-block rounded-4" controls preload="metadata" playsinline style="max-height: 480px; object-fit: contain; background: #000;">
-                    <source src="{{ invitation.video_file.url }}" type="video/mp4">
-                    Sizning brauzeringiz videoni qo'llab-quvvatlamaydi.
-                </video>
+            <div class="p-2 rounded-4 shadow-lg border border-warning border-opacity-50 bg-black mx-auto" style="max-width: 560px; box-shadow: 0 25px 60px rgba(0,0,0,0.65), 0 0 25px rgba(211,174,105,0.25) !important;">
+                <div class="position-relative overflow-hidden rounded-3 bg-black">
+                    <video id="customVideo" class="w-100 d-block rounded-3" preload="metadata" playsinline style="max-height: 460px; object-fit: contain; background: #000;">
+                        <source src="{{ invitation.video_file.url }}" type="video/mp4">
+                        Sizning brauzeringiz videoni qo'llab-quvvatlamaydi.
+                    </video>
+
+                    <!-- Custom Video Controls Overlay -->
+                    <div class="position-absolute bottom-0 start-0 end-0 p-3 d-flex flex-column gap-2" style="background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); backdrop-filter: blur(4px);">
+                        <!-- Progress Bar (Yellow) -->
+                        <div class="position-relative w-100 bg-secondary bg-opacity-50 rounded-pill" style="height: 7px; cursor: pointer;" id="videoProgressContainer">
+                            <div class="bg-warning rounded-pill h-100 position-relative" id="videoProgressBar" style="width: 0%;">
+                                <div class="position-absolute top-50 end-0 translate-middle-y bg-white rounded-circle shadow" style="width: 12px; height: 12px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Controls Row -->
+                        <div class="d-flex justify-content-between align-items-center text-white">
+                            <div class="d-flex align-items-center gap-3">
+                                <button type="button" class="btn btn-warning btn-sm rounded-circle d-flex align-items-center justify-content-center text-dark fw-bold shadow-sm" style="width: 38px; height: 38px; font-size: 14px;" id="videoPlayPauseBtn" onclick="toggleCustomVideo()">
+                                    <i class="fa-solid fa-play" id="videoPlayIcon"></i>
+                                </button>
+                                <span class="small font-monospace" id="videoTimeDisplay">0:00 / 0:00</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-sm text-white p-1" onclick="toggleVideoMute()" id="videoMuteBtn" title="Ovozni o'chirish/yoqish">
+                                    <i class="fa-solid fa-volume-high" id="videoMuteIcon"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm text-white p-1" onclick="toggleVideoFullscreen()" title="To'liq ekran">
+                                    <i class="fa-solid fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         {% endif %}
