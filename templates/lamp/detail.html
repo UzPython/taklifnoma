@@ -138,8 +138,29 @@
         overflow-wrap: anywhere;
     }
     .arch-card video {
+        height: min(440px, 70vh);
+        width: 100%;
         max-height: 430px;
-        object-fit: cover;
+        object-fit: contain;
+        background: #000;
+    }
+    #videoPlayerContainer:fullscreen,
+    #videoPlayerContainer:-webkit-full-screen {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0;
+        background: #000;
+    }
+    #videoPlayerContainer:fullscreen video,
+    #videoPlayerContainer:-webkit-full-screen video {
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        object-fit: contain;
     }
     .countdown-box {
         border-color: rgba(212,175,55,.34);
@@ -200,18 +221,21 @@
     <!-- Background Music Audio element -->
     {% if invitation.audio_file %}
     <div class="text-center mb-4">
-        <div class="d-inline-flex align-items-center gap-3 px-4 py-2 rounded-pill shadow-lg text-white border border-warning border-opacity-50" style="backdrop-filter: blur(12px); background: rgba(15, 28, 22, 0.9) !important;">
-            <button id="pillPlayBtn" class="btn btn-warning rounded-circle d-flex align-items-center justify-content-center text-dark fw-bold shadow-sm" style="width: 42px; height: 42px; font-size: 16px;" onclick="toggleMusic()">
-                <i class="fa-solid fa-play" id="pillPlayIcon"></i>
-            </button>
-            <div class="text-start" style="min-width: 110px;">
-                <div class="small fw-bold text-warning mb-0" style="font-size: 12px; letter-spacing: 0.5px;"><i class="fa-solid fa-music me-1"></i> Fon musiqasi</div>
-                <div class="text-muted" style="font-size: 11px;" id="audioTimeDisplay">0:00 / 0:00</div>
+        <div class="d-inline-flex flex-column gap-2 px-4 py-2 rounded-4 shadow-lg text-white border border-warning border-opacity-50" style="backdrop-filter: blur(12px); background: rgba(15, 28, 22, 0.9) !important; min-width: min(100%, 360px);">
+            <div class="d-flex align-items-center justify-content-between gap-3">
+                <button id="pillPlayBtn" class="btn btn-warning rounded-circle d-flex align-items-center justify-content-center text-dark fw-bold shadow-sm flex-shrink-0" style="width: 42px; height: 42px; font-size: 16px;" onclick="toggleMusic()">
+                    <i class="fa-solid fa-play" id="pillPlayIcon"></i>
+                </button>
+                <div class="text-start flex-grow-1">
+                    <div class="small fw-bold text-warning mb-0" style="font-size: 12px; letter-spacing: 0.5px;"><i class="fa-solid fa-music me-1"></i> Fon musiqasi</div>
+                    <div class="text-muted" style="font-size: 11px;" id="audioTimeDisplay">0:00 / 0:00</div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                    <i class="fa-solid fa-volume-high text-warning small"></i>
+                    <input type="range" id="audioVolume" min="0" max="1" step="0.05" value="1" aria-label="Musiqa ovozi" style="width: 55px; accent-color: #d3ae69;" oninput="changeVolume(this.value)">
+                </div>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <i class="fa-solid fa-volume-high text-warning small"></i>
-                <input type="range" id="audioVolume" min="0" max="1" step="0.05" value="1" style="width: 55px; accent-color: #d3ae69;" oninput="changeVolume(this.value)">
-            </div>
+            <input type="range" id="audioSeek" min="0" max="100" step="0.1" value="0" disabled aria-label="Musiqa vaqtini o‘tkazish" style="width: 100%; accent-color: #d3ae69; cursor: pointer; height: 8px;">
         </div>
         <audio id="bgAudio" loop preload="auto" src="{{ invitation.audio_file.url }}"></audio>
     </div>
@@ -261,21 +285,17 @@
                 </span>
             </div>
             <div class="p-2 rounded-4 shadow-lg border border-warning border-opacity-50 bg-black mx-auto" style="max-width: 560px; box-shadow: 0 25px 60px rgba(0,0,0,0.65), 0 0 25px rgba(211,174,105,0.25) !important;">
-                <div class="position-relative overflow-hidden rounded-3 bg-black">
-                    <video id="customVideo" class="w-100 d-block rounded-3" preload="metadata" playsinline style="height: 440px; width: 100%; object-fit: cover; background: #000;">
+                <div id="videoPlayerContainer" class="position-relative overflow-hidden rounded-3 bg-black">
+                    <video id="customVideo" class="w-100 d-block rounded-3" preload="metadata" playsinline>
                         <source src="{{ invitation.video_file.url }}" type="video/mp4">
                         Sizning brauzeringiz videoni qo'llab-quvvatlamaydi.
                     </video>
 
                     <!-- Custom Video Controls Overlay -->
-                    <div class="position-absolute bottom-0 start-0 end-0 p-3 d-flex flex-column gap-2" style="background: linear-gradient(to top, rgba(0,0,0,0.92), transparent); backdrop-filter: blur(4px);">
-                        <!-- Progress Bar (Yellow) with generous hit area -->
-                        <div class="position-relative w-100 py-1" style="cursor: pointer;" id="videoProgressContainer">
-                            <div class="w-100 bg-secondary bg-opacity-50 rounded-pill position-relative" style="height: 8px;">
-                                <div class="bg-warning rounded-pill h-100 position-relative" id="videoProgressBar" style="width: 0%;">
-                                    <div class="position-absolute top-50 end-0 translate-middle-y bg-white rounded-circle shadow" style="width: 14px; height: 14px;"></div>
-                                </div>
-                            </div>
+                    <div class="position-absolute bottom-0 start-0 end-0 p-3 d-flex flex-column gap-2" style="background: linear-gradient(to top, rgba(0,0,0,0.92), transparent); backdrop-filter: blur(4px); z-index: 10;">
+                        <!-- Range Seek Slider -->
+                        <div class="w-100 px-1">
+                            <input type="range" id="videoRangeSeek" min="0" max="100" step="0.1" value="0" class="w-100" style="accent-color: #ffc107; cursor: pointer; height: 8px;">
                         </div>
 
                         <!-- Controls Row -->
@@ -290,8 +310,8 @@
                                 <button type="button" class="btn btn-sm text-white p-1" onclick="toggleVideoMute()" id="videoMuteBtn" title="Ovozni o'chirish/yoqish">
                                     <i class="fa-solid fa-volume-high" id="videoMuteIcon"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm text-white p-1" onclick="toggleVideoFullscreen()" title="To'liq ekran">
-                                    <i class="fa-solid fa-expand"></i>
+                                <button type="button" class="btn btn-sm text-white p-1" onclick="toggleVideoFullscreen()" title="To'liq ekran" aria-label="To'liq ekranga o'tkazish">
+                                    <i class="fa-solid fa-expand" id="videoFullscreenIcon"></i>
                                 </button>
                             </div>
                         </div>
@@ -601,12 +621,28 @@
     document.addEventListener('DOMContentLoaded', () => {
         const audio = document.getElementById("bgAudio");
         if (audio) {
-            audio.addEventListener('timeupdate', () => {
-                const cur = formatTime(audio.currentTime);
-                const dur = formatTime(audio.duration || 0);
-                const timeDisp = document.getElementById("audioTimeDisplay");
-                if (timeDisp) timeDisp.innerText = `${cur} / ${dur}`;
+            const seekSlider = document.getElementById("audioSeek");
+            const timeDisplay = document.getElementById("audioTimeDisplay");
+
+            function updateAudioControls() {
+                const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+                const current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+                seekSlider.value = duration ? String((current / duration) * 100) : "0";
+                seekSlider.disabled = !duration;
+                const cur = formatTime(current);
+                timeDisplay.innerText = `${cur} / ${formatTime(duration)}`;
+            }
+
+            audio.addEventListener('loadedmetadata', updateAudioControls);
+            audio.addEventListener('durationchange', updateAudioControls);
+            audio.addEventListener('timeupdate', updateAudioControls);
+            audio.addEventListener('seeked', updateAudioControls);
+            seekSlider.addEventListener('input', () => {
+                if (Number.isFinite(audio.duration) && audio.duration > 0) {
+                    audio.currentTime = (Number(seekSlider.value) / 100) * audio.duration;
+                }
             });
+            updateAudioControls();
 
             audio.addEventListener('play', () => {
                 const playIcon = document.getElementById("pillPlayIcon");
@@ -630,65 +666,49 @@
         const video = document.getElementById("customVideo");
         if (video) {
             const playIcon = document.getElementById("videoPlayIcon");
-            const progressBar = document.getElementById("videoProgressBar");
-            const progressContainer = document.getElementById("videoProgressContainer");
+            const seekSlider = document.getElementById("videoRangeSeek");
             const timeDisplay = document.getElementById("videoTimeDisplay");
+            const fullscreenIcon = document.getElementById("videoFullscreenIcon");
+            const fullscreenButton = fullscreenIcon.closest("button");
 
             window.toggleCustomVideo = function() {
                 if (video.paused) {
-                    video.play();
-                    playIcon.className = "fa-solid fa-pause";
+                    video.play().catch(error => {
+                        console.error("Video play failed:", error);
+                    });
                 } else {
                     video.pause();
-                    playIcon.className = "fa-solid fa-play";
                 }
             };
 
-            video.addEventListener('timeupdate', () => {
-                if (!isDragging) {
-                    const current = video.currentTime;
-                    const duration = video.duration || 1;
-                    const percent = (current / duration) * 100;
-                    progressBar.style.width = percent + "%";
-                    timeDisplay.innerText = `${formatTime(current)} / ${formatTime(duration)}`;
-                }
+            function updateVideoControls() {
+                const duration = Number.isFinite(video.duration) ? video.duration : 0;
+                const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+                seekSlider.value = duration ? String((current / duration) * 100) : "0";
+                seekSlider.disabled = !duration;
+                timeDisplay.innerText = `${formatTime(current)} / ${formatTime(duration)}`;
+            }
+
+            video.addEventListener('loadedmetadata', updateVideoControls);
+            video.addEventListener('durationchange', updateVideoControls);
+            video.addEventListener('timeupdate', updateVideoControls);
+            video.addEventListener('play', () => {
+                playIcon.className = "fa-solid fa-pause";
+            });
+            video.addEventListener('pause', () => {
+                playIcon.className = "fa-solid fa-play";
             });
 
             video.addEventListener('ended', () => {
                 playIcon.className = "fa-solid fa-play";
             });
 
-            let isDragging = false;
-
-            function updateVideoProgress(e) {
-                const rect = progressContainer.getBoundingClientRect();
-                let pos = (e.clientX - rect.left) / rect.width;
-                pos = Math.max(0, Math.min(1, pos));
-                if (video.duration && !isNaN(video.duration)) {
-                    video.currentTime = pos * video.duration;
-                    progressBar.style.width = (pos * 100) + "%";
-                    timeDisplay.innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
-                }
-            }
-
-            progressContainer.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                updateVideoProgress(e);
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (isDragging) {
-                    updateVideoProgress(e);
+            seekSlider.addEventListener('input', () => {
+                if (Number.isFinite(video.duration) && video.duration > 0) {
+                    video.currentTime = (Number(seekSlider.value) / 100) * video.duration;
                 }
             });
-
-            document.addEventListener('mouseup', () => {
-                isDragging = false;
-            });
-
-            progressContainer.addEventListener('click', (e) => {
-                updateVideoProgress(e);
-            });
+            updateVideoControls();
 
             window.toggleVideoMute = function() {
                 video.muted = !video.muted;
@@ -696,12 +716,40 @@
                 muteIcon.className = video.muted ? "fa-solid fa-volume-xmark text-danger" : "fa-solid fa-volume-high";
             };
 
+            function updateFullscreenButton() {
+                const isFullscreen = document.fullscreenElement === video.parentElement ||
+                    document.webkitFullscreenElement === video.parentElement;
+                fullscreenIcon.className = isFullscreen ? "fa-solid fa-compress" : "fa-solid fa-expand";
+                fullscreenButton.title = isFullscreen ? "To'liq ekrandan chiqish" : "To'liq ekran";
+                fullscreenButton.setAttribute("aria-label", fullscreenButton.title);
+            }
+
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+
             window.toggleVideoFullscreen = function() {
-                const container = video.parentElement.parentElement;
+                const container = video.parentElement;
+                const isFullscreen = document.fullscreenElement === container ||
+                    document.webkitFullscreenElement === container;
+
+                if (isFullscreen) {
+                    const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
+                    if (exitFullscreen) {
+                        Promise.resolve(exitFullscreen.call(document)).catch(error => {
+                            console.error("Exiting video fullscreen failed:", error);
+                        });
+                    }
+                    return;
+                }
+
                 if (container.requestFullscreen) {
-                    container.requestFullscreen();
+                    container.requestFullscreen().catch(error => {
+                        console.error("Entering video fullscreen failed:", error);
+                    });
                 } else if (container.webkitRequestFullscreen) {
                     container.webkitRequestFullscreen();
+                } else if (video.webkitEnterFullscreen) {
+                    video.webkitEnterFullscreen();
                 }
             };
         }
