@@ -2,14 +2,43 @@ import os
 import threading
 import time
 import json
-import urllib.request
+import urllib.error
 import urllib.parse
+import urllib.request
 from django.apps import AppConfig
 from django.conf import settings
 from django.core.cache import cache
 from django.db.backends.signals import connection_created
 from django.dispatch import receiver
 from lamp.middleware import ban_ip, unban_ip, get_banned_ips
+
+
+def configure_telegram_webhook(bot_token, webhook_url):
+    api_url = f"https://api.telegram.org/bot{bot_token}"
+    info_request = urllib.request.Request(f"{api_url}/getWebhookInfo")
+    with urllib.request.urlopen(info_request, timeout=5) as response:
+        info = json.loads(response.read().decode('utf-8'))
+
+    if not info.get('ok'):
+        raise RuntimeError("Telegram did not return webhook information.")
+
+    current_url = info.get('result', {}).get('url', '')
+    if current_url == webhook_url:
+        return False
+
+    payload = urllib.parse.urlencode({'url': webhook_url}).encode('utf-8')
+    set_request = urllib.request.Request(
+        f"{api_url}/setWebhook",
+        data=payload,
+        method='POST',
+    )
+    with urllib.request.urlopen(set_request, timeout=5) as response:
+        result = json.loads(response.read().decode('utf-8'))
+
+    if not result.get('ok'):
+        raise RuntimeError("Telegram rejected the webhook configuration.")
+    return True
+
 
 @receiver(connection_created)
 def configure_sqlite_connection(sender, connection, **kwargs):
@@ -39,10 +68,13 @@ class LampConfig(AppConfig):
                     else:
                         webhook_url = "https://taklifnoma-production-94ce.up.railway.app/telegram/webhook/"
 
-                    url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url={urllib.parse.quote(webhook_url)}"
-                    urllib.request.urlopen(urllib.request.Request(url, method='POST'), timeout=5)
+                    configure_telegram_webhook(bot_token, webhook_url)
+                except urllib.error.HTTPError as e:
+                    print(f"Telegram webhook configuration failed (HTTP {e.code}).")
+                except RuntimeError as e:
+                    print(f"Telegram webhook configuration failed: {e}")
                 except Exception as e:
-                    print(f"Set webhook error: {e}")
+                    print(f"Telegram webhook configuration failed: {type(e).__name__}.")
 
             threading.Thread(target=setup_webhook, daemon=True).start()
 

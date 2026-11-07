@@ -1,13 +1,59 @@
+import json
 import uuid
+import urllib.parse
+from unittest.mock import MagicMock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from .apps import configure_telegram_webhook
 from .models import Invitation, RSVP
+
+
+class TelegramWebhookConfigurationTests(SimpleTestCase):
+    def make_response(self, payload):
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.read.return_value = json.dumps(payload).encode('utf-8')
+        return response
+
+    @patch('lamp.apps.urllib.request.urlopen')
+    def test_existing_webhook_is_not_registered_again(self, urlopen):
+        webhook_url = 'https://example.com/telegram/webhook/'
+        urlopen.return_value = self.make_response({
+            'ok': True,
+            'result': {'url': webhook_url},
+        })
+
+        changed = configure_telegram_webhook('test-token', webhook_url)
+
+        self.assertFalse(changed)
+        urlopen.assert_called_once()
+        self.assertTrue(urlopen.call_args.args[0].full_url.endswith('/getWebhookInfo'))
+
+    @patch('lamp.apps.urllib.request.urlopen')
+    def test_changed_webhook_url_is_registered(self, urlopen):
+        webhook_url = 'https://example.com/telegram/webhook/'
+        urlopen.side_effect = [
+            self.make_response({'ok': True, 'result': {'url': ''}}),
+            self.make_response({'ok': True, 'result': True}),
+        ]
+
+        changed = configure_telegram_webhook('test-token', webhook_url)
+
+        self.assertTrue(changed)
+        self.assertEqual(urlopen.call_count, 2)
+        set_request = urlopen.call_args.args[0]
+        self.assertEqual(set_request.full_url, 'https://api.telegram.org/bottest-token/setWebhook')
+        self.assertEqual(set_request.method, 'POST')
+        self.assertEqual(
+            urllib.parse.parse_qs(set_request.data.decode('utf-8')),
+            {'url': [webhook_url]},
+        )
 
 
 class InvitationPrivacyTests(TestCase):
