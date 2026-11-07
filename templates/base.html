@@ -37,6 +37,9 @@
             --surface-border: rgba(26, 34, 27, 0.08);
             --muted-color: #6b726b;
             --glow-shadow: 0 20px 50px rgba(212, 175, 55, 0.15);
+            --surface-shadow: 0 12px 32px rgba(24, 38, 28, 0.07);
+            --surface-shadow-hover: 0 20px 48px rgba(24, 38, 28, 0.12);
+            --focus-ring: 0 0 0 0.24rem rgba(212, 175, 55, 0.2);
         }
         [data-bs-theme="dark"] {
             --bg-color: #0d1410;
@@ -46,9 +49,21 @@
             --surface-border: rgba(255,255,255,0.08);
             --muted-color: #9ca8a0;
             --glow-shadow: 0 20px 50px rgba(212, 175, 55, 0.22);
+            --surface-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+            --surface-shadow-hover: 0 20px 48px rgba(0, 0, 0, 0.32);
+            color-scheme: dark;
+        }
+        [data-bs-theme="light"] {
+            color-scheme: light;
+        }
+        ::selection {
+            color: #17241b;
+            background: rgba(212, 175, 55, 0.38);
         }
         body {
             font-family: 'Montserrat', sans-serif;
+            font-size: 0.96rem;
+            line-height: 1.65;
             background:
                 radial-gradient(circle at 15% 0%, rgba(212, 175, 55, 0.1), transparent 35rem),
                 radial-gradient(circle at 85% 90%, rgba(70, 107, 85, 0.08), transparent 30rem),
@@ -59,12 +74,17 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
         main {
             flex: 1;
         }
         h1, h2, h3, .playfair {
             font-family: 'Playfair Display', serif;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            text-wrap: pretty;
         }
         .navbar {
             background: linear-gradient(110deg, #0d1b15, #162c22 55%, #1f382b) !important;
@@ -74,7 +94,8 @@
         }
         .navbar-brand {
             font-weight: 700;
-            letter-spacing: 0.3px;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
         }
         .navbar-brand i {
             color: var(--accent);
@@ -82,7 +103,7 @@
         }
         .navbar .nav-link {
             border-radius: 999px;
-            transition: all 0.25s ease;
+            transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
         }
         .navbar .nav-link:hover,
         .navbar .nav-link.active {
@@ -99,28 +120,32 @@
             background-color: var(--card-bg) !important;
             color: var(--text-color) !important;
             border: 1px solid var(--surface-border) !important;
+            border-radius: 1.15rem;
+            box-shadow: var(--surface-shadow);
             transition: background-color 0.3s ease, color 0.3s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .card:not(.invitation-card):hover {
             transform: translateY(-4px);
-            box-shadow: var(--glow-shadow);
+            box-shadow: var(--surface-shadow-hover);
         }
         footer {
-            background-color: var(--nav-bg);
+            background: linear-gradient(120deg, #0d1b15, #162c22 58%, #1f382b);
             color: #9ca3af;
-            padding: 40px 0;
-            margin-top: 80px;
+            padding: 44px 0;
+            margin-top: clamp(48px, 7vw, 80px);
             border-top: 1px solid rgba(212, 175, 55, 0.12);
         }
         .btn {
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            font-weight: 600;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
         }
         .btn:hover {
             transform: translateY(-1px);
         }
         .btn:focus-visible,
         .theme-toggle-btn:focus-visible,
-        .navbar a:focus-visible {
+        .navbar a:focus-visible,
+        .navbar-toggler:focus-visible {
             outline: 3px solid rgba(212, 175, 55, 0.8);
             outline-offset: 3px;
         }
@@ -131,13 +156,18 @@
             border-radius: 12px;
             background-color: var(--card-bg);
             color: var(--text-color);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
         }
         .form-control:focus,
         .form-select:focus {
             border-color: #d4af37;
             background-color: var(--card-bg);
             color: var(--text-color);
-            box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.2);
+            box-shadow: var(--focus-ring);
+        }
+        .form-control::placeholder {
+            color: var(--muted-color);
+            opacity: 0.72;
         }
         textarea.form-control {
             min-height: 120px;
@@ -160,6 +190,23 @@
             border-color: rgba(212, 175, 55, 0.6);
             transform: translateY(-1px);
         }
+        .dropdown-menu {
+            padding: 0.5rem;
+            border: 1px solid var(--surface-border);
+            border-radius: 14px;
+            background-color: var(--card-bg);
+            box-shadow: var(--surface-shadow-hover);
+        }
+        .dropdown-item {
+            padding: 0.65rem 0.8rem;
+            border-radius: 9px;
+            color: var(--text-color);
+        }
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            color: var(--text-color);
+            background-color: rgba(124, 145, 98, 0.12);
+        }
         @media (max-width: 991.98px) {
             .navbar-nav {
                 align-items: stretch !important;
@@ -174,6 +221,26 @@
                 justify-content: center;
                 width: 100%;
                 margin-top: 4px;
+            }
+        }
+        @media (max-width: 575.98px) {
+            body {
+                font-size: 0.94rem;
+            }
+            .navbar {
+                padding-top: 0.75rem !important;
+                padding-bottom: 0.75rem !important;
+            }
+            .navbar-brand {
+                font-size: 1.2rem !important;
+            }
+            #aiAssistantWidget {
+                right: 16px !important;
+                bottom: max(16px, env(safe-area-inset-bottom)) !important;
+            }
+            #aiChatBox {
+                right: 0 !important;
+                width: min(350px, calc(100vw - 32px)) !important;
             }
         }
         @media (prefers-reduced-motion: reduce) {
