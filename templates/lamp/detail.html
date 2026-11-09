@@ -118,6 +118,191 @@
         text-transform: uppercase;
         letter-spacing: 1px;
     }
+    .invitation-stage {
+        position: relative;
+        display: grid;
+        min-height: min(820px, 100vh);
+        min-height: min(820px, 100svh);
+        place-items: center;
+        overflow: hidden;
+        padding: 32px 18px;
+        color: #f7e7c7;
+        text-align: center;
+        background:
+            radial-gradient(ellipse at center, rgba(113, 42, 42, .45), transparent 58%),
+            linear-gradient(145deg, #180d0e, #351213 48%, #160b0d);
+    }
+    .invitation-stage[hidden] {
+        display: none;
+    }
+    .seal-stage::before,
+    .seal-stage::after {
+        position: absolute;
+        inset: -35%;
+        border: 1px solid rgba(226, 195, 139, .75);
+        content: "";
+        pointer-events: none;
+    }
+    .seal-stage::before {
+        transform: rotate(58deg);
+    }
+    .seal-stage::after {
+        transform: rotate(-58deg);
+    }
+    .seal-panel {
+        position: relative;
+        z-index: 1;
+        width: min(100%, 430px);
+        padding: 44px 24px;
+        border: 1px solid rgba(232, 202, 151, .35);
+        border-radius: 220px 220px 28px 28px;
+        background: linear-gradient(180deg, rgba(77, 29, 29, .8), rgba(27, 13, 14, .92));
+        box-shadow: 0 24px 80px rgba(0, 0, 0, .48), inset 0 0 50px rgba(193, 139, 89, .08);
+    }
+    .seal-mark {
+        display: grid;
+        width: 132px;
+        height: 132px;
+        place-items: center;
+        margin: 0 auto 25px;
+        border: 5px double #c6a575;
+        border-radius: 50%;
+        color: #805138;
+        background: radial-gradient(circle, #fff5df, #d7bd94);
+        box-shadow: 0 0 0 9px rgba(198, 165, 117, .12), 0 12px 30px rgba(0, 0, 0, .35);
+        font-family: 'Playfair Display', serif;
+        font-size: 2.8rem;
+        font-style: italic;
+    }
+    .seal-greeting {
+        color: #e6ca9e;
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(1.45rem, 5vw, 2rem);
+        font-style: italic;
+        overflow-wrap: anywhere;
+    }
+    .stage-kicker {
+        color: #d3ae69;
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .24em;
+        text-transform: uppercase;
+    }
+    .stage-open-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 24px;
+        padding: 13px 22px;
+        border: 1px solid rgba(230, 202, 158, .65);
+        border-radius: 50px;
+        color: #f7e7c7;
+        background: rgba(15, 9, 10, .45);
+        font-weight: 600;
+        transition: transform .2s ease, background .2s ease;
+    }
+    .stage-open-button:hover {
+        transform: translateY(-2px);
+        color: #fff4dc;
+        background: rgba(211, 174, 105, .2);
+    }
+    .cover-stage {
+        min-height: min(900px, 100vh);
+        min-height: min(900px, 100svh);
+        background:
+            radial-gradient(ellipse at 50% 48%, rgba(37, 45, 37, .98), rgba(12, 17, 15, .98) 60%),
+            #101512;
+    }
+    .cover-curtain {
+        position: absolute;
+        inset: 0 0 auto;
+        height: 20%;
+        border-bottom: 2px solid rgba(211, 174, 105, .72);
+        background: repeating-radial-gradient(ellipse at 50% 0, #160b0d 0 24px, #592324 25px 28px, #1d0d0f 30px 48px);
+        box-shadow: 0 18px 30px rgba(0, 0, 0, .4);
+    }
+    .cover-curtain::before,
+    .cover-curtain::after {
+        position: absolute;
+        top: 0;
+        bottom: -34vh;
+        width: min(17vw, 150px);
+        border: 1px solid rgba(211, 174, 105, .5);
+        background: linear-gradient(90deg, #1c0c0e, #632629 38%, #210d10 78%);
+        content: "";
+    }
+    .cover-curtain::before {
+        left: 0;
+        clip-path: polygon(0 0, 100% 0, 76% 100%, 0 87%);
+    }
+    .cover-curtain::after {
+        right: 0;
+        clip-path: polygon(0 0, 100% 0, 100% 87%, 24% 100%);
+    }
+    .cover-arch {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        width: min(100%, 690px);
+        min-height: min(640px, 75vh);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 90px 28px 40px;
+        border: 2px solid #9a7646;
+        border-radius: 48% 48% 8px 8px / 24% 24% 8px 8px;
+        background: linear-gradient(180deg, rgba(10, 16, 13, .86), rgba(18, 19, 16, .95));
+        box-shadow: 0 0 0 8px rgba(211, 174, 105, .08), 0 25px 80px rgba(0, 0, 0, .52), inset 0 0 60px rgba(211, 174, 105, .08);
+    }
+    .cover-arch h1 {
+        margin: 20px 0;
+        color: #e8c98e;
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2rem, 6vw, 3rem);
+        font-style: italic;
+        font-weight: 400;
+    }
+    .cover-names {
+        color: #f5e5c4;
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2.4rem, 9vw, 5.2rem);
+        font-style: italic;
+        line-height: 1.18;
+        overflow-wrap: anywhere;
+    }
+    .cover-ampersand {
+        margin: 4px 0;
+        color: #d3ae69;
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        font-style: italic;
+    }
+    .stage-arrows {
+        display: block;
+        color: #d3ae69;
+        font-size: 2rem;
+        line-height: .65;
+    }
+    .invitation-journey-active .invitation-details {
+        display: none;
+    }
+    @media (max-width: 575.98px) {
+        .invitation-stage {
+            min-height: min(760px, 100svh);
+            padding: 22px 14px;
+        }
+        .seal-panel {
+            padding: 36px 18px;
+        }
+        .cover-arch {
+            min-height: 72vh;
+            padding: 76px 20px 30px;
+        }
+        .cover-curtain {
+            height: 15%;
+        }
+    }
     .wish-card {
         background: rgba(0, 0, 0, 0.04);
         border: 1px solid rgba(0, 0, 0, 0.08);
@@ -217,7 +402,38 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-5 invitation-page">
+<section class="invitation-stage seal-stage" id="invitationSeal" aria-label="Taklifnoma muhri" hidden>
+    <div class="seal-panel">
+        <div class="seal-mark" aria-hidden="true">❦</div>
+        <div class="stage-kicker mb-3">Sizga maxsus taklifnoma</div>
+        <div class="seal-greeting mb-2">Hurmatli {{ invitation.guest_name|default:"aziz mehmon"|linebreaksbr }}</div>
+        <p class="small opacity-75 mb-0">Siz uchun tayyorlangan taklifnomani oching</p>
+        <button type="button" class="stage-open-button" data-open-cover>
+            Muhrni ochish <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+</section>
+
+<section class="invitation-stage cover-stage" id="invitationCover" aria-label="Taklifnoma muqovasi" hidden>
+    <div class="cover-curtain" aria-hidden="true"></div>
+    <div class="cover-arch">
+        <div class="stage-kicker">Sizni taklif qilamiz</div>
+        <h1>{{ invitation.get_event_type_display|default:"Taklifnoma" }}</h1>
+        <div class="cover-names">{{ invitation.hosts }}</div>
+        <div class="cover-ampersand" aria-hidden="true">&amp;</div>
+        {% if invitation.guest_name %}
+        <p class="mb-0">Hurmatli <strong>{{ invitation.guest_name|linebreaksbr }}</strong></p>
+        {% else %}
+        <p class="mb-0">Aziz mehmon, tashrifingizdan mamnun bo‘lamiz</p>
+        {% endif %}
+        <button type="button" class="stage-open-button" data-open-details>
+            Taklifnomani batafsil ochish
+            <span class="stage-arrows" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+        </button>
+    </div>
+</section>
+
+<div class="container py-5 invitation-page invitation-details" id="invitationDetails" tabindex="-1">
     <!-- Background Music Audio element -->
     {% if invitation.audio_file %}
     <div class="text-center mb-4">
@@ -248,7 +464,7 @@
         <!-- Top Badge -->
         <div class="mb-3">
             <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-semibold text-uppercase shadow-sm">
-                <i class="fa-solid fa-champagne-glasses me-1"></i> {{ invitation.get_event_display }}
+                <i class="fa-solid fa-champagne-glasses me-1"></i> {{ invitation.get_event_type_display }}
             </span>
         </div>
 
@@ -322,8 +538,8 @@
 
         {% if invitation.guest_name %}
         <div class="alert bg-warning text-dark border-0 fw-semibold py-3 mb-4 mx-auto w-75 rounded-4 shadow-sm">
-            <div class="small text-uppercase opacity-75 mb-1"><i class="fa-solid fa-user-group me-1"></i> Hurmatli mehmon(lar):</div>
-            {{ invitation.guest_name|linebreaksbr }}
+            <div class="small text-uppercase opacity-75 mb-1"><i class="fa-solid fa-user-check me-1"></i> Sizga maxsus:</div>
+            Hurmatli {{ invitation.guest_name|linebreaksbr }}
         </div>
         {% endif %}
 
@@ -455,15 +671,6 @@
 
 {% block extra_js %}
 <script>
-    // Trigger celebratory confetti on load
-    window.addEventListener('DOMContentLoaded', (event) => {
-        confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
-        });
-    });
-
     function toggleMusic() {
         const audio = document.getElementById("bgAudio");
         const playIcon = document.getElementById("pillPlayIcon");
@@ -502,6 +709,32 @@
 
     // Keep UI in sync if user uses audio controls
     document.addEventListener('DOMContentLoaded', () => {
+        const sealStage = document.getElementById('invitationSeal');
+        const coverStage = document.getElementById('invitationCover');
+        const invitationDetails = document.getElementById('invitationDetails');
+
+        if (sealStage && coverStage && invitationDetails) {
+            sealStage.hidden = false;
+            invitationDetails.hidden = true;
+            document.documentElement.classList.add('invitation-journey-active');
+
+            document.querySelector('[data-open-cover]').addEventListener('click', () => {
+                sealStage.hidden = true;
+                coverStage.hidden = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            document.querySelector('[data-open-details]').addEventListener('click', () => {
+                coverStage.hidden = true;
+                invitationDetails.hidden = false;
+                document.documentElement.classList.remove('invitation-journey-active');
+                invitationDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                }
+            });
+        }
+
         const audio = document.getElementById("bgAudio");
         if (audio) {
             const seekSlider = document.getElementById("audioSeek");

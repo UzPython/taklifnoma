@@ -161,15 +161,32 @@
                     <div class="form-section-heading">
                         <div class="form-section-icon"><i class="fa-solid fa-heart"></i></div>
                         <div>
-                            <h2 class="fw-bold mb-1">Ism va familiya</h2>
-                            <p class="mb-0">Taklifnomada ko'rsatiladigan ism-familiyani kiriting.</p>
+                            <h2 class="fw-bold mb-1">Juftlik ismlari</h2>
+                            <p class="mb-0">Taklifnomada ko'rsatiladigan ism-familiyalarni kiriting.</p>
                         </div>
                     </div>
                     <div class="row g-3">
                         <div class="col-12">
-                            <label class="form-label fw-semibold" for="{{ form.hosts.id_for_label }}">Ism va familiya</label>
+                            <label class="form-label fw-semibold" for="{{ form.hosts.id_for_label }}">Juftlik ismlari</label>
                             {{ form.hosts }}
                             <div class="form-text">Masalan: Anvar va Dilnoza</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-heading">
+                        <div class="form-section-icon"><i class="fa-solid fa-user-check"></i></div>
+                        <div>
+                            <h2 class="fw-bold mb-1">Kimni taklif qilasiz?</h2>
+                            <p class="mb-0">Mehmonning ismi taklifnomada alohida va hurmat bilan ko‘rinadi.</p>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" for="{{ form.guest_name.id_for_label }}">Mehmonning ism-familiyasi</label>
+                            {{ form.guest_name }}
+                            <div class="form-text">Masalan: Alisher aka. Har bir mehmon uchun alohida taklifnoma yarating.</div>
                         </div>
                     </div>
                 </section>
@@ -222,6 +239,23 @@
                             <label class="form-label fw-semibold" for="{{ form.venue_map_url.id_for_label }}">Xarita havolasi (ixtiyoriy)</label>
                             {{ form.venue_map_url }}
                             <div class="form-text">Xaritada joy tanlasangiz, havola shu yerga avtomatik yoziladi. Xohlasangiz, xarita havolasini qo‘lda ham kiritishingiz mumkin.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-heading">
+                        <div class="form-section-icon"><i class="fa-solid fa-music"></i></div>
+                        <div>
+                            <h2 class="fw-bold mb-1">Fon musiqasi</h2>
+                            <p class="mb-0">Taklifnoma ochilganda mehmonlar musiqani yoqib tinglashlari mumkin.</p>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" for="{{ form.audio_file.id_for_label }}">Musiqa faylini yuklang (ixtiyoriy)</label>
+                            {{ form.audio_file }}
+                            <div class="form-text">MP3 yoki M4A formatidagi qo‘shiq faylini tanlang. Brauzer talabiga ko‘ra mehmon musiqani tugma orqali yoqadi.</div>
                         </div>
                     </div>
                 </section>

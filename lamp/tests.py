@@ -1,4 +1,5 @@
 import json
+import tempfile
 import uuid
 import urllib.parse
 from unittest.mock import MagicMock, patch
@@ -118,6 +119,7 @@ class InvitationPrivacyTests(TestCase):
         self.client.force_login(self.user)
         response = self.client.post(reverse('create_invitation'), {
             'hosts': 'New hosts',
+            'guest_name': 'Alisher aka',
             'event_datetime': '2030-05-01T10:00',
             'venue_name': 'New venue',
             'venue_address': 'New address',
@@ -127,6 +129,7 @@ class InvitationPrivacyTests(TestCase):
         created = Invitation.objects.get(venue_name='New venue')
         self.assertEqual(created.user, self.user)
         self.assertEqual(created.hosts, 'New hosts')
+        self.assertEqual(created.guest_name, 'Alisher aka')
         self.assertEqual(created.event_type, 'wedding')
         self.assertEqual(created.template_style, 'paper')
         self.assertEqual(created.title, "To'y taklifnomasi")
@@ -139,7 +142,8 @@ class InvitationPrivacyTests(TestCase):
 
         page = self.client.get(edit_url)
         self.assertEqual(page.status_code, 200)
-        self.assertContains(page, 'Ism va familiya')
+        self.assertContains(page, 'Juftlik ismlari')
+        self.assertContains(page, 'Mehmonning ism-familiyasi')
         for removed_section in (
             'Tadbir turi va Dizayn',
             'Ism va Sarlavha',
@@ -151,6 +155,7 @@ class InvitationPrivacyTests(TestCase):
 
         response = self.client.post(edit_url, {
             'hosts': 'Updated hosts',
+            'guest_name': 'Updated guest',
             'event_datetime': '2030-05-01T10:00',
             'venue_name': 'Updated venue',
             'venue_address': 'Updated address',
@@ -164,6 +169,7 @@ class InvitationPrivacyTests(TestCase):
         self.invitation.refresh_from_db()
         self.assertEqual(self.invitation.title, 'Private celebration')
         self.assertEqual(self.invitation.hosts, 'Updated hosts')
+        self.assertEqual(self.invitation.guest_name, 'Updated guest')
         self.assertEqual(self.invitation.venue_name, 'Updated venue')
         self.assertEqual(self.invitation.venue_map_url, 'https://maps.google.com/?q=Updated+venue')
 
@@ -174,6 +180,20 @@ class InvitationPrivacyTests(TestCase):
         response = self.client.get(reverse('invitation_detail', args=[self.invitation.pk]))
 
         self.assertContains(response, 'href="https://maps.app.goo.gl/example"')
+
+    def test_public_invitation_has_personalized_opening_stages(self):
+        self.invitation.guest_name = 'Alisher aka'
+        self.invitation.save()
+
+        response = self.client.get(reverse('invitation_detail', args=[self.invitation.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="invitationSeal"')
+        self.assertContains(response, 'id="invitationCover"')
+        self.assertContains(response, 'id="invitationDetails"')
+        self.assertContains(response, 'Hurmatli Alisher aka')
+        self.assertContains(response, 'Test host')
+        self.assertContains(response, 'Nikoh to&#x27;yi')
 
     def test_map_link_only_accepts_http_or_https_urls(self):
         self.client.force_login(self.user)
@@ -250,8 +270,10 @@ class RemovedInvitationFieldsTests(TestCase):
         page = self.client.get(reverse('create_invitation'))
         self.assertEqual(
             set(page.context['form'].fields),
-            {'hosts', 'event_datetime', 'venue_name', 'venue_address', 'venue_map_url'},
+            {'hosts', 'guest_name', 'event_datetime', 'venue_name', 'venue_address', 'venue_map_url', 'audio_file'},
         )
+        self.assertContains(page, 'name="audio_file"')
+        self.assertContains(page, 'accept=".mp3,.m4a,audio/mpeg,audio/mp4"')
         self.assertContains(page, 'venue-map-search-input')
         self.assertContains(page, 'venue-map')
         self.assertContains(page, 'nominatim.openstreetmap.org')
@@ -262,6 +284,7 @@ class RemovedInvitationFieldsTests(TestCase):
         upload = SimpleUploadedFile("unused.txt", b"unused")
         response = self.client.post(reverse('create_invitation'), {
             'hosts': 'Test couple',
+            'guest_name': 'Test guest',
             'event_datetime': '2030-05-01T10:00',
             'venue_name': 'Venue',
             'venue_address': 'Address',
@@ -273,6 +296,55 @@ class RemovedInvitationFieldsTests(TestCase):
 
 
 class MediaServingTests(TestCase):
+    def test_invitation_audio_can_be_uploaded_and_is_available_to_guests(self):
+        self.client.force_login(User.objects.create_user(username='music@example.com'))
+        audio_content = b'test audio data'
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with self.settings(MEDIA_ROOT=media_root):
+                response = self.client.post(reverse('create_invitation'), {
+                    'hosts': 'Test couple',
+                    'guest_name': 'Test guest',
+                    'event_datetime': '2030-05-01T10:00',
+                    'venue_name': 'Music venue',
+                    'venue_address': 'Music address',
+                    'audio_file': SimpleUploadedFile(
+                        'wedding-song.mp3',
+                        audio_content,
+                        content_type='audio/mpeg',
+                    ),
+                })
+
+                self.assertEqual(response.status_code, 302)
+                invitation = Invitation.objects.get(venue_name='Music venue')
+                self.assertTrue(invitation.audio_file.name.startswith('audio/'))
+                with invitation.audio_file.open('rb') as uploaded_audio:
+                    self.assertEqual(uploaded_audio.read(), audio_content)
+
+                page = self.client.get(reverse('invitation_detail', args=[invitation.pk]))
+                self.assertContains(page, invitation.audio_file.url)
+                self.assertContains(page, 'id="bgAudio"')
+
+    def test_invitation_audio_rejects_unsupported_file_extensions(self):
+        self.client.force_login(User.objects.create_user(username='invalidmusic@example.com'))
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with self.settings(MEDIA_ROOT=media_root):
+                response = self.client.post(reverse('create_invitation'), {
+                    'hosts': 'Test couple',
+                    'event_datetime': '2030-05-01T10:00',
+                    'venue_name': 'Invalid music venue',
+                    'audio_file': SimpleUploadedFile(
+                        'song.wav',
+                        b'not supported',
+                        content_type='audio/wav',
+                    ),
+                })
+
+                self.assertEqual(response.status_code, 200)
+                self.assertFalse(Invitation.objects.filter(venue_name='Invalid music venue').exists())
+                self.assertIn('audio_file', response.context['form'].errors)
+
     @override_settings(DEBUG=False)
     def test_media_url_serves_audio_when_debug_is_false(self):
         relative_path = f"audio/test-{uuid.uuid4()}.mp3"

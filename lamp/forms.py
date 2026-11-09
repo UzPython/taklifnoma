@@ -9,17 +9,24 @@ class InvitationForm(forms.ModelForm):
         model = Invitation
         fields = [
             'hosts',
+            'guest_name',
             'event_datetime',
             'venue_name',
             'venue_address',
             'venue_map_url',
+            'audio_file',
         ]
         widgets = {
             'hosts': forms.TextInput(attrs={'class': 'form-control form-control-lg', 'placeholder': 'Masalan: Anvar va Dilnoza'}),
+            'guest_name': forms.TextInput(attrs={'class': 'form-control form-control-lg', 'placeholder': 'Masalan: Alisher aka'}),
             'event_datetime': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control form-control-lg'}, format='%Y-%m-%dT%H:%M'),
             'venue_name': forms.TextInput(attrs={'class': 'form-control form-control-lg', 'placeholder': "Masalan: 'Oqsaroy' tantanalar saroyi"}),
             'venue_address': forms.HiddenInput(),
             'venue_map_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://maps.app.goo.gl/...'}),
+            'audio_file': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': '.mp3,.m4a,audio/mpeg,audio/mp4',
+            }),
         }
 
     def __init__(self, *args, **kwargs):
