@@ -243,6 +243,12 @@ def like_invitation(request, pk):
             Like.objects.create(invitation=invitation, user=user, session_key=session_key if not user else None)
             invitation.likes_count += 1
             invitation.save(update_fields=['likes_count'])
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'liked': True,
+                'likes_count': invitation.likes_count,
+            })
     return redirect('invitation_detail', pk=invitation.pk)
 
 def invitation_detail_url_placeholder(request, pk):

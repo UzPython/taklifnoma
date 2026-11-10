@@ -1,4 +1,5 @@
 import json
+from io import BytesIO
 import tempfile
 import uuid
 import urllib.parse
@@ -10,9 +11,11 @@ from django.contrib.auth.models import User
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
+from PIL import Image
 
 from .apps import configure_telegram_webhook
-from .models import Invitation, RSVP
+from .forms import MAX_COVER_IMAGE_SIZE, InvitationForm
+from .models import Invitation, Like, RSVP
 
 
 class TelegramWebhookConfigurationTests(SimpleTestCase):
@@ -100,6 +103,40 @@ class InvitationPrivacyTests(TestCase):
         self.assertNotContains(response, 'enableCustomPushReminder')
         self.assertNotContains(response, 'Kalendarga qo&#x27;shish')
         self.assertContains(response, 'Lokatsiyani ochish')
+
+    def test_like_updates_without_reloading_and_cannot_be_counted_twice(self):
+        like_url = reverse('like_invitation', args=[self.invitation.pk])
+        headers = {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
+
+        first_response = self.client.post(like_url, **headers)
+
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(first_response.json(), {
+            'success': True,
+            'liked': True,
+            'likes_count': 1,
+        })
+        self.assertEqual(Like.objects.filter(invitation=self.invitation).count(), 1)
+
+        second_response = self.client.post(like_url, **headers)
+
+        self.assertEqual(second_response.status_code, 200)
+        self.assertEqual(second_response.json()['likes_count'], 1)
+        self.assertEqual(Like.objects.filter(invitation=self.invitation).count(), 1)
+
+    def test_like_form_enhancement_keeps_fallback_and_accessible_count(self):
+        response = self.client.get(
+            reverse('invitation_detail', args=[self.invitation.pk])
+        )
+
+        self.assertContains(response, 'id="likeForm"')
+        self.assertContains(response, 'id="likeCount">0</span>')
+        self.assertContains(response, 'aria-live="polite"')
+        self.assertContains(response, "event.preventDefault();")
+        self.assertRedirects(
+            self.client.post(reverse('like_invitation', args=[self.invitation.pk])),
+            reverse('invitation_detail', args=[self.invitation.pk]),
+        )
 
     def test_success_page_is_only_visible_to_owner(self):
         self.client.force_login(self.user)
@@ -270,8 +307,12 @@ class RemovedInvitationFieldsTests(TestCase):
         page = self.client.get(reverse('create_invitation'))
         self.assertEqual(
             set(page.context['form'].fields),
-            {'hosts', 'guest_name', 'event_datetime', 'venue_name', 'venue_address', 'venue_map_url', 'audio_file'},
+            {'hosts', 'guest_name', 'event_datetime', 'venue_name', 'venue_address', 'venue_map_url', 'cover_image', 'audio_file'},
         )
+        self.assertContains(page, 'name="cover_image"')
+        self.assertContains(page, 'accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"')
+        self.assertContains(page, '100 MB gacha')
+        self.assertContains(page, 'Taklifnoma fon rasmi')
         self.assertContains(page, 'name="audio_file"')
         self.assertContains(page, 'accept=".mp3,.m4a,audio/mpeg,audio/mp4"')
         self.assertContains(page, 'venue-map-search-input')
@@ -290,12 +331,85 @@ class RemovedInvitationFieldsTests(TestCase):
             'venue_address': 'Address',
             'cover_image': upload,
         })
-        self.assertEqual(response.status_code, 302)
-        invitation = Invitation.objects.get(venue_name='Venue')
-        self.assertFalse(invitation.cover_image)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Invitation.objects.filter(venue_name='Venue').exists())
+        self.assertIn('cover_image', response.context['form'].errors)
 
 
 class MediaServingTests(TestCase):
+    def test_cover_image_upload_rejects_files_over_100_mb(self):
+        oversized_image = SimpleUploadedFile('large.jpg', b'not read')
+        oversized_image.size = MAX_COVER_IMAGE_SIZE + 1
+        form = InvitationForm(data={
+            'hosts': 'Test couple',
+            'event_datetime': '2030-05-01T10:00',
+            'venue_name': 'Oversized image venue',
+        }, files={'cover_image': oversized_image})
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('100 MB dan katta bo‘lmasligi kerak', str(form.errors))
+
+    def test_invitation_background_image_can_be_uploaded_displayed_and_replaced(self):
+        user = User.objects.create_user(username='background@example.com')
+        self.client.force_login(user)
+
+        def make_image(name, color):
+            image_bytes = BytesIO()
+            Image.new('RGB', (32, 24), color=color).save(image_bytes, format='JPEG')
+            return SimpleUploadedFile(name, image_bytes.getvalue(), content_type='image/jpeg')
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with self.settings(MEDIA_ROOT=media_root):
+                response = self.client.post(reverse('create_invitation'), {
+                    'hosts': 'Test couple',
+                    'guest_name': 'Test guest',
+                    'event_datetime': '2030-05-01T10:00',
+                    'venue_name': 'Picture venue',
+                    'venue_address': 'Picture address',
+                    'cover_image': make_image('first-background.jpg', (160, 80, 40)),
+                })
+
+                self.assertEqual(response.status_code, 302)
+                invitation = Invitation.objects.get(venue_name='Picture venue')
+                self.assertTrue(invitation.cover_image.name.startswith('covers/'))
+                self.assertTrue(invitation.cover_image.url.startswith(settings.MEDIA_URL))
+
+                detail_url = reverse('invitation_detail', args=[invitation.pk])
+                page = self.client.get(detail_url)
+                self.assertContains(page, invitation.cover_image.url)
+                self.assertContains(page, 'cover-stage has-cover-image')
+                self.assertContains(page, 'seal-stage has-cover-image')
+                self.assertContains(page, 'cover-arch has-cover-image')
+                self.assertContains(page, 'seal-panel has-cover-image')
+                self.assertContains(page, '.invitation-stage.has-cover-image')
+                self.assertEqual(page.content.count(b'class="invitation-image-fill"'), 2)
+                self.assertContains(page, 'background-size: cover;')
+                self.assertContains(page, 'filter: blur(8px) brightness(.55);')
+                self.assertContains(page, 'background-size: 100% 100%, contain;')
+                self.assertContains(page, 'background-attachment: fixed;')
+                self.assertContains(page, f'url("{invitation.cover_image.url}")')
+
+                edit_url = reverse('edit_invitation', args=[invitation.pk])
+                edit_page = self.client.get(edit_url)
+                self.assertContains(edit_page, invitation.cover_image.url)
+                self.assertContains(edit_page, 'Hozirgi fon rasmi')
+
+                response = self.client.post(edit_url, {
+                    'hosts': 'Test couple',
+                    'guest_name': 'Test guest',
+                    'event_datetime': '2030-05-01T10:00',
+                    'venue_name': 'Picture venue',
+                    'venue_address': 'Picture address',
+                    'cover_image': make_image('replacement-background.jpg', (40, 80, 160)),
+                })
+
+                self.assertEqual(response.status_code, 302)
+                invitation.refresh_from_db()
+                self.assertTrue(invitation.cover_image.name.startswith('covers/'))
+                self.assertTrue(invitation.cover_image.name.endswith('replacement-background.jpg'))
+                page = self.client.get(detail_url)
+                self.assertContains(page, invitation.cover_image.url)
+
     def test_invitation_audio_can_be_uploaded_and_is_available_to_guests(self):
         self.client.force_login(User.objects.create_user(username='music@example.com'))
         audio_content = b'test audio data'

@@ -30,17 +30,25 @@
         flex-direction: column;
         justify-content: space-between;
     }
+    {% if invitation.cover_image %}
+    body {
+        background-color: #101512;
+        background-image: linear-gradient(rgba(10,14,12,.48), rgba(10,14,12,.72)), url("{{ invitation.cover_image.url }}");
+        background-position: center;
+        background-size: 100% 100%, contain;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+    {% endif %}
     .arch-card {
-        background-color: {% if invitation.cover_image %}transparent{% else %}
+        background-color: {% if invitation.cover_image %}rgba(10,16,13,.28){% else %}
             {% if invitation.template_style == 'royal' %}#111827
             {% elif invitation.template_style == 'rose' %}#fffbeb
             {% else %}#f4efe6{% endif %}
         {% endif %};
         {% if invitation.cover_image %}
-        background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)), url("{{ invitation.cover_image.url }}");
-        background-size: cover;
-        background-position: center;
         color: #ffffff;
+        backdrop-filter: blur(2px);
         {% else %}
         color: {% if invitation.template_style == 'royal' %}#f3f4f6{% else %}#2c3e50{% endif %};
         {% endif %}
@@ -159,6 +167,12 @@
         background: linear-gradient(180deg, rgba(77, 29, 29, .8), rgba(27, 13, 14, .92));
         box-shadow: 0 24px 80px rgba(0, 0, 0, .48), inset 0 0 50px rgba(193, 139, 89, .08);
     }
+    {% if invitation.cover_image %}
+    .seal-panel.has-cover-image {
+        background: linear-gradient(180deg, rgba(77, 29, 29, .42), rgba(27, 13, 14, .62));
+        backdrop-filter: blur(2px);
+    }
+    {% endif %}
     .seal-mark {
         display: grid;
         width: 132px;
@@ -214,6 +228,24 @@
             radial-gradient(ellipse at 50% 48%, rgba(37, 45, 37, .98), rgba(12, 17, 15, .98) 60%),
             #101512;
     }
+    {% if invitation.cover_image %}
+    .invitation-stage.has-cover-image {
+        background-image: linear-gradient(rgba(10, 14, 12, .48), rgba(10, 14, 12, .78)), url("{{ invitation.cover_image.url }}");
+        background-position: center;
+        background-size: 100% 100%, contain;
+        background-repeat: no-repeat;
+        background-color: #101512;
+    }
+    .invitation-image-fill {
+        position: absolute;
+        z-index: 0;
+        inset: -8px;
+        background-image: url("{{ invitation.cover_image.url }}");
+        background-position: center;
+        background-size: cover;
+        filter: blur(8px) brightness(.55);
+        pointer-events: none;
+    }
     .cover-curtain {
         position: absolute;
         inset: 0 0 auto;
@@ -255,6 +287,11 @@
         background: linear-gradient(180deg, rgba(10, 16, 13, .86), rgba(18, 19, 16, .95));
         box-shadow: 0 0 0 8px rgba(211, 174, 105, .08), 0 25px 80px rgba(0, 0, 0, .52), inset 0 0 60px rgba(211, 174, 105, .08);
     }
+    .cover-arch.has-cover-image {
+        background: linear-gradient(180deg, rgba(10, 16, 13, .48), rgba(18, 19, 16, .7));
+        backdrop-filter: blur(2px);
+    }
+    {% endif %}
     .cover-arch h1 {
         margin: 20px 0;
         color: #e8c98e;
@@ -351,6 +388,124 @@
         border-color: rgba(212,175,55,.34);
         background: rgba(0,0,0,.28);
     }
+    .event-info-card {
+        padding: clamp(18px, 4vw, 25px);
+        border: 1px solid rgba(175,138,76,.34);
+        border-radius: 20px;
+        color: #2d382e;
+        background: linear-gradient(145deg, #fffdf8, #f3ead8);
+        box-shadow: 0 14px 34px rgba(38,31,20,.12);
+    }
+    .event-info-card.royal {
+        border-color: rgba(211,174,105,.42);
+        color: #f3eee1;
+        background: linear-gradient(145deg, #20241e, #111410);
+    }
+    .event-info-card.rose {
+        border-color: rgba(174,89,102,.25);
+        color: #4a2d32;
+        background: linear-gradient(145deg, #fff8f4, #f6e5df);
+    }
+    .event-info-card.has-cover {
+        border-color: rgba(255,255,255,.32);
+        color: #fff;
+        background: linear-gradient(145deg, rgba(20,25,21,.78), rgba(20,25,21,.92));
+        backdrop-filter: blur(12px);
+    }
+    .event-info-row + .event-info-row {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(131,105,66,.2);
+    }
+    .event-info-label {
+        color: #81745e;
+        font-size: .78rem;
+    }
+    .event-info-card.royal .event-info-label,
+    .event-info-card.has-cover .event-info-label {
+        color: rgba(255,255,255,.68);
+    }
+    .event-info-card.rose .event-info-label {
+        color: #8d686e;
+    }
+    .event-info-address {
+        overflow-wrap: anywhere;
+    }
+    .event-map-link {
+        color: #392b17;
+        background: linear-gradient(135deg, #f3e4c2, #dfc58e);
+        border: 0;
+        font-weight: 700;
+    }
+    .event-map-link:hover {
+        color: #2d2111;
+        background: linear-gradient(135deg, #f8ebd0, #e8cf99);
+    }
+    .qr-share-card {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 18px;
+        border: 1px solid rgba(175,138,76,.3);
+        border-radius: 20px;
+        color: #4a3920;
+        background: linear-gradient(145deg, #fffdf8, #f3ead8);
+        box-shadow: 0 12px 30px rgba(38,31,20,.12);
+    }
+    .qr-share-card img {
+        width: 116px;
+        height: 116px;
+        padding: 6px;
+        border-radius: 12px;
+        background: #fff;
+    }
+    .like-form {
+        margin: 0;
+    }
+    .like-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid rgba(184,134,11,.38);
+        color: #4a3920;
+        background: linear-gradient(135deg, #fff8e9, #f1dfb8);
+        box-shadow: 0 5px 16px rgba(48,35,15,.12);
+        transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .like-button:hover:not(:disabled) {
+        color: #3a2a15;
+        background: linear-gradient(135deg, #fff2d6, #e8cf99);
+        box-shadow: 0 8px 20px rgba(48,35,15,.2);
+        transform: translateY(-2px);
+    }
+    .like-button:disabled {
+        color: #4a3920;
+        opacity: 1;
+    }
+    .like-button.is-liked {
+        border-color: rgba(191,73,92,.3);
+        background: linear-gradient(135deg, #fff0f1, #f7d8dc);
+    }
+    .like-button.is-loading {
+        cursor: wait;
+        opacity: .7;
+    }
+    .like-button.is-animating .like-icon {
+        animation: like-pop .45s ease;
+    }
+    .like-status {
+        min-height: 1.25em;
+        color: #a33b4d;
+        font-size: .78rem;
+    }
+    @keyframes like-pop {
+        50% { transform: scale(1.45); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .like-button.is-animating .like-icon {
+            animation: none;
+        }
+    }
     .music-btn {
         bottom: max(20px, env(safe-area-inset-bottom));
         right: max(20px, env(safe-area-inset-right));
@@ -402,8 +557,9 @@
 {% endblock %}
 
 {% block content %}
-<section class="invitation-stage seal-stage" id="invitationSeal" aria-label="Taklifnoma muhri" hidden>
-    <div class="seal-panel">
+<section class="invitation-stage seal-stage{% if invitation.cover_image %} has-cover-image{% endif %}" id="invitationSeal" aria-label="Taklifnoma muhri" hidden>
+    {% if invitation.cover_image %}<div class="invitation-image-fill" aria-hidden="true"></div>{% endif %}
+    <div class="seal-panel{% if invitation.cover_image %} has-cover-image{% endif %}">
         <div class="seal-mark" aria-hidden="true">❦</div>
         <div class="stage-kicker mb-3">Sizga maxsus taklifnoma</div>
         <div class="seal-greeting mb-2">Hurmatli {{ invitation.guest_name|default:"aziz mehmon"|linebreaksbr }}</div>
@@ -414,9 +570,10 @@
     </div>
 </section>
 
-<section class="invitation-stage cover-stage" id="invitationCover" aria-label="Taklifnoma muqovasi" hidden>
+<section class="invitation-stage cover-stage{% if invitation.cover_image %} has-cover-image{% endif %}" id="invitationCover" aria-label="Taklifnoma muqovasi" hidden>
+    {% if invitation.cover_image %}<div class="invitation-image-fill" aria-hidden="true"></div>{% endif %}
     <div class="cover-curtain" aria-hidden="true"></div>
-    <div class="cover-arch">
+    <div class="cover-arch{% if invitation.cover_image %} has-cover-image{% endif %}">
         <div class="stage-kicker">Sizni taklif qilamiz</div>
         <h1>{{ invitation.get_event_type_display|default:"Taklifnoma" }}</h1>
         <div class="cover-names">{{ invitation.hosts }}</div>
@@ -471,11 +628,14 @@
         <div class="text-uppercase tracking-widest small opacity-75 mb-2">Aziz mehmon sizni</div>
         
         <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-3">
-            <form method="post" action="{% url 'like_invitation' invitation.pk %}">
+            <form method="post" action="{% url 'like_invitation' invitation.pk %}" class="like-form" id="likeForm">
                 {% csrf_token %}
-                <button type="submit" class="btn {% if has_liked %}btn-light text-danger opacity-75{% else %}btn-outline-light{% endif %} rounded-pill px-3 py-2 fw-semibold" {% if has_liked %}disabled title="Siz allaqachon like bosgansiz"{% endif %}>
-                    <i class="fa-solid fa-heart me-1 text-danger"></i> Yoqdi ({{ invitation.likes_count }})
+                <button type="submit" class="btn like-button rounded-pill px-3 py-2 fw-semibold{% if has_liked %} is-liked{% endif %}" aria-pressed="{% if has_liked %}true{% else %}false{% endif %}" {% if has_liked %}disabled title="Siz allaqachon like bosgansiz"{% endif %}>
+                    <i class="fa-solid fa-heart like-icon" aria-hidden="true"></i>
+                    <span>Yoqdi</span>
+                    <span class="like-count" id="likeCount">{{ invitation.likes_count }}</span>
                 </button>
+                <div class="like-status" id="likeStatus" role="status" aria-live="polite"></div>
             </form>
             <span class="badge bg-light text-dark rounded-pill px-3 py-2">
                 <i class="fa-solid fa-users me-1"></i> {{ invitation.rsvps.count }} javob
@@ -547,26 +707,26 @@
 
         <!-- Date & Venue -->
         <div class="my-4 row g-3 justify-content-center text-start px-2">
-            <div class="col-12 bg-black bg-opacity-25 p-3 rounded-3 border border-warning border-opacity-25">
-                <div class="d-flex align-items-center mb-3">
+            <div class="col-12 event-info-card{% if invitation.cover_image %} has-cover{% elif invitation.template_style == 'royal' %} royal{% elif invitation.template_style == 'rose' %} rose{% endif %}">
+                <div class="d-flex align-items-center event-info-row">
                     <i class="fa-solid fa-calendar-days text-warning fs-4 me-3"></i>
                     <div>
-                        <div class="small opacity-75">Sana va vaqt</div>
+                        <div class="event-info-label">Sana va vaqt</div>
                         <div class="fw-bold">{{ invitation.event_datetime|date:"d.m.Y H:i" }}</div>
                     </div>
                 </div>
-                <div class="d-flex align-items-center mb-3">
+                <div class="d-flex align-items-center event-info-row">
                     <i class="fa-solid fa-location-dot text-danger fs-4 me-3"></i>
                     <div>
-                        <div class="small opacity-75">{{ invitation.venue_name }}</div>
-                        <div class="fw-bold small">{{ invitation.venue_address }}</div>
+                        <div class="event-info-label">{{ invitation.venue_name }}</div>
+                        <div class="fw-bold small event-info-address">{{ invitation.venue_address }}</div>
                     </div>
                 </div>
 
                 <!-- Map action -->
-                <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top border-secondary border-opacity-25">
-                    <a href="{% if invitation.venue_map_url %}{{ invitation.venue_map_url }}{% else %}https://maps.google.com/?q={{ invitation.venue_name|urlencode }} {{ invitation.venue_address|urlencode }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-sm flex-fill">
-                        <i class="fa-solid fa-map-location-dot me-1 text-danger"></i> Lokatsiyani ochish
+                <div class="d-flex flex-wrap gap-2 mt-3 pt-3 border-top border-secondary border-opacity-25">
+                    <a href="{% if invitation.venue_map_url %}{{ invitation.venue_map_url }}{% else %}https://maps.google.com/?q={{ invitation.venue_name|urlencode }} {{ invitation.venue_address|urlencode }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn event-map-link rounded-pill flex-fill">
+                        <i class="fa-solid fa-map-location-dot me-2"></i> Lokatsiyani ochish
                     </a>
                 </div>
             </div>
@@ -577,9 +737,9 @@
         </div>
 
         <!-- QR Code for quick mobile access -->
-        <div class="mt-3 p-3 bg-black bg-opacity-25 rounded-3 border border-warning border-opacity-25 d-inline-block">
-            <div class="small fw-semibold mb-2 text-warning">📲 QR Kod orqali ochish:</div>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data={{ request.build_absolute_uri }}" alt="QR Code" class="rounded shadow-sm bg-white p-1" style="width: 100px; height: 100px;">
+        <div class="qr-share-card mt-3">
+            <div class="small fw-semibold mb-3"><i class="fa-solid fa-qrcode me-2 text-warning"></i>QR kod orqali oching</div>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data={{ request.build_absolute_uri }}" alt="Taklifnoma havolasining QR kodi">
         </div>
     </div>
 
@@ -709,6 +869,52 @@
 
     // Keep UI in sync if user uses audio controls
     document.addEventListener('DOMContentLoaded', () => {
+        const likeForm = document.getElementById('likeForm');
+        if (likeForm) {
+            const likeButton = likeForm.querySelector('button[type="submit"]');
+            const likeCount = document.getElementById('likeCount');
+            const likeStatus = document.getElementById('likeStatus');
+
+            likeForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                if (likeButton.disabled) return;
+
+                likeButton.disabled = true;
+                likeButton.classList.add('is-loading');
+                likeStatus.textContent = '';
+
+                try {
+                    const response = await fetch(likeForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': likeForm.querySelector('[name="csrfmiddlewaretoken"]').value,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: new FormData(likeForm),
+                        credentials: 'same-origin',
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.error || 'Like yuborilmadi.');
+                    }
+
+                    likeCount.textContent = result.likes_count;
+                    likeButton.setAttribute('aria-pressed', String(result.liked));
+                    likeButton.classList.toggle('is-liked', result.liked);
+                    likeButton.classList.remove('is-loading');
+                    likeButton.classList.add('is-animating');
+                    likeButton.title = 'Siz allaqachon like bosgansiz';
+                    window.setTimeout(() => likeButton.classList.remove('is-animating'), 500);
+                } catch (error) {
+                    likeButton.disabled = false;
+                    likeStatus.textContent = 'Like yuborilmadi. Internetni tekshirib, qayta urinib ko‘ring.';
+                    console.error('Like yuborishda xatolik:', error);
+                } finally {
+                    likeButton.classList.remove('is-loading');
+                }
+            });
+        }
+
         const sealStage = document.getElementById('invitationSeal');
         const coverStage = document.getElementById('invitationCover');
         const invitationDetails = document.getElementById('invitationDetails');

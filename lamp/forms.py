@@ -4,7 +4,25 @@ from django.core.exceptions import ValidationError
 from PIL import Image
 from .models import Invitation, RSVP
 
+MAX_COVER_IMAGE_SIZE = 100 * 1024 * 1024
+
+
+class CoverImageField(forms.ImageField):
+    def to_python(self, data):
+        if data and data.size > MAX_COVER_IMAGE_SIZE:
+            raise ValidationError("Fon rasmi 100 MB dan katta bo‘lmasligi kerak.")
+        return super().to_python(data)
+
+
 class InvitationForm(forms.ModelForm):
+    cover_image = CoverImageField(
+        required=False,
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': '.jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif',
+        }),
+    )
+
     class Meta:
         model = Invitation
         fields = [
@@ -14,6 +32,7 @@ class InvitationForm(forms.ModelForm):
             'venue_name',
             'venue_address',
             'venue_map_url',
+            'cover_image',
             'audio_file',
         ]
         widgets = {

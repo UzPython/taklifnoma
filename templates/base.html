@@ -87,10 +87,24 @@
             text-wrap: pretty;
         }
         .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
             background: linear-gradient(110deg, #0d1b15, #162c22 55%, #1f382b) !important;
             border-bottom: 1px solid rgba(212, 175, 55, 0.15);
             backdrop-filter: blur(12px);
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .scroll-progress {
+            position: fixed;
+            z-index: 1100;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #d3ae69, #f3e5c4);
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.55);
+            pointer-events: none;
         }
         .navbar-brand {
             font-weight: 700;
@@ -130,10 +144,31 @@
         }
         footer {
             background: linear-gradient(120deg, #0d1b15, #162c22 58%, #1f382b);
-            color: #9ca3af;
-            padding: 44px 0;
+            color: rgba(255,255,255,.68);
+            padding: clamp(36px, 6vw, 58px) 0 22px;
             margin-top: clamp(48px, 7vw, 80px);
             border-top: 1px solid rgba(212, 175, 55, 0.12);
+        }
+        .footer-brand {
+            color: #f0dfb8;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -.02em;
+        }
+        .footer-brand i {
+            color: var(--accent);
+        }
+        .footer-link {
+            color: rgba(255,255,255,.7);
+            text-decoration: none;
+            transition: color .2s ease;
+        }
+        .footer-link:hover,
+        .footer-link:focus-visible {
+            color: #f0dfb8;
+        }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,.12);
         }
         .btn {
             font-weight: 600;
@@ -258,6 +293,8 @@
 </head>
 <body>
 
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm py-3">
         <div class="container">
@@ -316,9 +353,33 @@
 
     <!-- Footer -->
     <footer>
-        <div class="container text-center">
-            <p class="mb-1 fw-semibold">&copy; 2026 Taklifnoma.uz. Barcha huquqlar himoyalangan.</p>
-            <p class="small text-muted mb-0">To'y va tantanali tadbirlaringiz uchun zamonaviy elektron taklifnomalar va eslatmalar.</p>
+        <div class="container">
+            <div class="row g-4 align-items-start pb-4">
+                <div class="col-lg-6">
+                    <a class="footer-brand text-decoration-none" href="{% url 'home' %}">
+                        <i class="fa-solid fa-envelope-open-text me-2"></i>Taklifnoma.uz
+                    </a>
+                    <p class="small mt-3 mb-0" style="max-width: 430px;">To‘y va unutilmas kunlaringiz uchun o‘zingizga xos elektron taklifnoma yarating va yaqinlaringiz bilan ulashing.</p>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <h2 class="small fw-bold text-white mb-3">Sahifalar</h2>
+                    <ul class="list-unstyled small d-grid gap-2 mb-0">
+                        <li><a class="footer-link" href="{% url 'home' %}">Bosh sahifa</a></li>
+                        <li><a class="footer-link" href="{% url 'templates_list' %}">Shablonlar</a></li>
+                        <li><a class="footer-link" href="{% url 'my_invitations' %}">Mening taklifnomalarim</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <h2 class="small fw-bold text-white mb-3">Boshlash</h2>
+                    <a class="btn btn-warning text-dark fw-bold rounded-pill px-3 py-2" href="{% url 'create_invitation' %}">
+                        <i class="fa-solid fa-plus me-1"></i>Taklifnoma yaratish
+                    </a>
+                </div>
+            </div>
+            <div class="footer-bottom d-flex flex-column flex-sm-row justify-content-between gap-2 pt-3 small">
+                <span>&copy; {% now "Y" %} Taklifnoma.uz. Barcha huquqlar himoyalangan.</span>
+                <span>Yaxshi kunlar chiroyli taklifnomadan boshlanadi.</span>
+            </div>
         </div>
     </footer>
 
@@ -525,6 +586,16 @@
         // Initialize theme from storage
         const savedTheme = localStorage.getItem('theme') || 'light';
         setTheme(savedTheme);
+
+        const scrollProgress = document.getElementById('scrollProgress');
+        function updateScrollProgress() {
+            const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = scrollableHeight > 0 ? (window.scrollY / scrollableHeight) * 100 : 0;
+            scrollProgress.style.width = `${progress}%`;
+        }
+        window.addEventListener('scroll', updateScrollProgress, { passive: true });
+        window.addEventListener('resize', updateScrollProgress);
+        updateScrollProgress();
     </script>
     {% block extra_js %}{% endblock %}
 </body>

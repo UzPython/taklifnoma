@@ -90,6 +90,16 @@
         border-radius: 18px;
         background: rgba(124,145,98,.055);
     }
+    .cover-image-preview {
+        display: block;
+        width: min(100%, 520px);
+        max-height: 240px;
+        margin-top: 16px;
+        border: 1px solid var(--surface-border);
+        border-radius: 16px;
+        object-fit: cover;
+        box-shadow: var(--surface-shadow);
+    }
     .create-submit {
         color: #1d281e;
         background: linear-gradient(135deg, #f0dfb8, #d3ae69);
@@ -239,6 +249,33 @@
                             <label class="form-label fw-semibold" for="{{ form.venue_map_url.id_for_label }}">Xarita havolasi (ixtiyoriy)</label>
                             {{ form.venue_map_url }}
                             <div class="form-text">Xaritada joy tanlasangiz, havola shu yerga avtomatik yoziladi. Xohlasangiz, xarita havolasini qo‘lda ham kiritishingiz mumkin.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-heading">
+                        <div class="form-section-icon"><i class="fa-solid fa-image"></i></div>
+                        <div>
+                            <h2 class="fw-bold mb-1">Taklifnoma fon rasmi</h2>
+                            <p class="mb-0">O‘z rasmingizni yuklang — u taklifnoma dizayni fonida ko‘rinadi.</p>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" for="{{ form.cover_image.id_for_label }}">Fon rasmini tanlang (ixtiyoriy)</label>
+                            {{ form.cover_image }}
+                            <div class="form-text">JPG, PNG, WEBP yoki GIF, 100 MB gacha. Rasm to‘liq ko‘rinadi va standart fon o‘rnini egallaydi.</div>
+                            <img
+                                id="coverImagePreview"
+                                class="cover-image-preview"
+                                src="{% if form.instance.cover_image %}{{ form.instance.cover_image.url }}{% endif %}"
+                                alt="Tanlangan taklifnoma fon rasmi"
+                                {% if not form.instance.cover_image %}hidden{% endif %}
+                            >
+                            <div id="coverImagePreviewLabel" class="form-text" {% if not form.instance.cover_image %}hidden{% endif %}>
+                                {% if form.instance.cover_image %}Hozirgi fon rasmi. Yangi rasm tanlasangiz, uning o‘rniga qo‘yiladi.{% endif %}
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -396,6 +433,26 @@
             }
         }
         setTimeout(() => map.invalidateSize(), 0);
+    })();
+</script>
+<script>
+    (() => {
+        const imageInput = document.getElementById('{{ form.cover_image.id_for_label }}');
+        const imagePreview = document.getElementById('coverImagePreview');
+        const previewLabel = document.getElementById('coverImagePreviewLabel');
+        if (!imageInput || !imagePreview) return;
+
+        let previewUrl = null;
+        imageInput.addEventListener('change', () => {
+            const imageFile = imageInput.files[0];
+            if (!imageFile) return;
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+            previewUrl = URL.createObjectURL(imageFile);
+            imagePreview.src = previewUrl;
+            imagePreview.hidden = false;
+            previewLabel.textContent = 'Yangi tanlangan rasm fon sifatida ishlatiladi.';
+            previewLabel.hidden = false;
+        });
     })();
 </script>
 {% endblock %}

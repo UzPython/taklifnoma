@@ -399,6 +399,49 @@
     .home-cta h2 {
         font-size: clamp(1.8rem, 3.5vw, 2.7rem);
     }
+    .faq-panel {
+        padding: clamp(24px, 5vw, 48px);
+        border: 1px solid var(--surface-border);
+        border-radius: 26px;
+        background: var(--card-bg);
+        box-shadow: var(--surface-shadow);
+    }
+    .faq-panel h2 {
+        color: var(--text-color);
+        font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+    }
+    .faq-accordion .accordion-item {
+        overflow: hidden;
+        border: 1px solid var(--surface-border);
+        border-radius: 14px;
+        background: var(--card-bg);
+    }
+    .faq-accordion .accordion-button {
+        gap: 12px;
+        padding: 18px 20px;
+        color: var(--text-color);
+        background: var(--card-bg);
+        box-shadow: none;
+        font-weight: 700;
+    }
+    .faq-accordion .accordion-button:not(.collapsed) {
+        color: #526946;
+    }
+    [data-bs-theme="dark"] .faq-accordion .accordion-button:not(.collapsed) {
+        color: #dfc58e;
+    }
+    .faq-accordion .accordion-button:focus {
+        border-color: rgba(212,175,55,.45);
+        box-shadow: var(--focus-ring);
+    }
+    [data-bs-theme="dark"] .faq-accordion .accordion-button::after {
+        filter: invert(1);
+    }
+    .faq-accordion .accordion-body {
+        padding: 0 20px 18px 52px;
+        color: var(--muted-color);
+        line-height: 1.75;
+    }
     @media (max-width: 767.98px) {
         .home-hero {
             border-radius: 24px;
@@ -598,6 +641,62 @@
                     <div class="step-number">03</div>
                     <h3 class="h5 fw-bold">Havolani yuboring</h3>
                     <p class="small mb-0">Tayyor sahifani yaqinlaringizga ulashing va javoblarni kuzating.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section" aria-labelledby="faqHeading">
+        <div class="faq-panel">
+            <div class="row g-4 align-items-start">
+                <div class="col-lg-4">
+                    <div class="section-kicker mb-3">Savollaringiz bormi?</div>
+                    <h2 class="playfair fw-bold mb-3" id="faqHeading">Qisqa va lo‘nda javoblar</h2>
+                    <p class="text-muted mb-0">Taklifnoma yaratish va mehmonlarga yuborish haqida kerakli ma’lumotlar.</p>
+                </div>
+                <div class="col-lg-8">
+                    <div class="accordion faq-accordion d-grid gap-2" id="homeFaq">
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="faqCreateHeading">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqCreate" aria-expanded="true" aria-controls="faqCreate">
+                                    Taklifnomani qanday yarataman?
+                                </button>
+                            </h3>
+                            <div id="faqCreate" class="accordion-collapse collapse show" aria-labelledby="faqCreateHeading" data-bs-parent="#homeFaq">
+                                <div class="accordion-body">Dizayn tanlang, tadbir ma’lumotlarini kiriting va taklifnomani saqlang. Tayyor sahifani darhol mehmonlaringizga yuborishingiz mumkin.</div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="faqEditHeading">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqEdit" aria-expanded="false" aria-controls="faqEdit">
+                                    Saqlaganimdan keyin ma’lumotlarni o‘zgartira olamanmi?
+                                </button>
+                            </h3>
+                            <div id="faqEdit" class="accordion-collapse collapse" aria-labelledby="faqEditHeading" data-bs-parent="#homeFaq">
+                                <div class="accordion-body">Ha. “Mening taklifnomalarim” sahifasidan taklifnomangizni ochib, mavjud tahrirlash imkoniyatlaridan foydalaning.</div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="faqShareHeading">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqShare" aria-expanded="false" aria-controls="faqShare">
+                                    Taklifnomani mehmonlarga qanday yuboraman?
+                                </button>
+                            </h3>
+                            <div id="faqShare" class="accordion-collapse collapse" aria-labelledby="faqShareHeading" data-bs-parent="#homeFaq">
+                                <div class="accordion-body">Yaratilgandan keyin taklifnoma havolasini nusxalashingiz yoki QR kodni ulashishingiz mumkin. Mehmonlar havolani telefonda ochadi.</div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="faqRsvpHeading">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqRsvp" aria-expanded="false" aria-controls="faqRsvp">
+                                    Mehmonlar kelishini tasdiqlay oladimi?
+                                </button>
+                            </h3>
+                            <div id="faqRsvp" class="accordion-collapse collapse" aria-labelledby="faqRsvpHeading" data-bs-parent="#homeFaq">
+                                <div class="accordion-body">Ha. Mehmonlar taklifnoma sahifasida qatnashish javobini va tilaklarini qoldirishi mumkin.</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
