@@ -21,6 +21,7 @@ class Invitation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True, related_name='invitations')
     owner_token = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
+    share_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True, verbose_name="Umumiy havola tokeni")
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES, default='wedding', verbose_name="Tadbir turi", db_index=True)
     template_style = models.CharField(max_length=20, choices=TEMPLATE_CHOICES, default='paper', verbose_name="Taklifnoma dizayni", db_index=True)
     title = models.CharField(max_length=200, default="To'y taklifnomasi", verbose_name="Taklifnoma sarlavhasi")

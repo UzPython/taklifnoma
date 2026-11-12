@@ -12,7 +12,7 @@ from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count, Q
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
@@ -34,6 +34,10 @@ def _get_owner_token(request):
         request.session[OWNER_SESSION_KEY] = token
         request.session.set_expiry(60 * 60 * 24 * 365)
     return uuid.UUID(token)
+
+
+def _get_invitation_share_url(request, invitation):
+    return request.build_absolute_uri(reverse('invitation_share', args=[invitation.share_token]))
 
 
 def login_view(request):
@@ -138,15 +142,82 @@ def templates_list_view(request):
 
 @login_required(login_url='login')
 def my_invitations_view(request):
+    query = request.GET.get('q', '').strip()
+    sort = request.GET.get('sort', 'recent')
+
     invitations = Invitation.objects.filter(user=request.user).annotate(
-        rsvp_total_count=Count('rsvps'),
-        rsvp_yes_count=Count('rsvps', filter=Q(rsvps__attendance='yes')),
-        rsvp_maybe_count=Count('rsvps', filter=Q(rsvps__attendance='maybe')),
-        rsvp_no_count=Count('rsvps', filter=Q(rsvps__attendance='no')),
-    ).order_by('-created_at')
+        rsvp_total_count=Count('rsvps', distinct=True),
+        rsvp_yes_count=Count('rsvps', filter=Q(rsvps__attendance='yes'), distinct=True),
+        rsvp_maybe_count=Count('rsvps', filter=Q(rsvps__attendance='maybe'), distinct=True),
+        rsvp_no_count=Count('rsvps', filter=Q(rsvps__attendance='no'), distinct=True),
+    )
+
+    if query:
+        invitations = invitations.filter(
+            Q(title__icontains=query)
+            | Q(hosts__icontains=query)
+            | Q(venue_name__icontains=query)
+            | Q(guest_name__icontains=query)
+        )
+
+    order_by_map = {
+        'recent': '-created_at',
+        'soonest': 'event_datetime',
+        'likes': '-likes_count',
+        'rsvps': '-rsvp_total_count',
+    }
+    invitations = invitations.order_by(order_by_map.get(sort, '-created_at'))
+
+    total_invitations = invitations.count()
+    total_rsvps = sum(invitation.rsvp_total_count for invitation in invitations)
+    total_yes = sum(invitation.rsvp_yes_count for invitation in invitations)
+    total_maybe = sum(invitation.rsvp_maybe_count for invitation in invitations)
+    upcoming_count = invitations.filter(event_datetime__gte=timezone.now()).count()
+
     return render(request, 'lamp/my_invitations.html', {
         'invitations': invitations,
+        'query': query,
+        'sort': sort,
+        'stats': {
+            'total_invitations': total_invitations,
+            'total_rsvps': total_rsvps,
+            'total_yes': total_yes,
+            'total_maybe': total_maybe,
+            'upcoming_count': upcoming_count,
+        },
     })
+
+
+@login_required(login_url='login')
+def export_all_invitations_view(request):
+    invitations = Invitation.objects.filter(user=request.user).annotate(
+        rsvp_total_count=Count('rsvps', distinct=True),
+        rsvp_yes_count=Count('rsvps', filter=Q(rsvps__attendance='yes'), distinct=True),
+        rsvp_maybe_count=Count('rsvps', filter=Q(rsvps__attendance='maybe'), distinct=True),
+        rsvp_no_count=Count('rsvps', filter=Q(rsvps__attendance='no'), distinct=True),
+    ).order_by('-created_at')
+
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="all-invitations-summary.csv"'
+    response['Cache-Control'] = 'private, no-store'
+    response.write('\ufeff')
+
+    writer = csv.writer(response)
+    writer.writerow(['Sarlavha', 'Xostlar', 'Tadbir turi', 'Vaqti', 'Manzil', 'Jami javoblar', 'Keladi', 'Balki', 'Kelolmaydi', 'Yoqtirishlar'])
+    for invitation in invitations.iterator():
+        writer.writerow([
+            invitation.title,
+            invitation.hosts,
+            invitation.get_event_type_display(),
+            timezone.localtime(invitation.event_datetime).strftime('%Y-%m-%d %H:%M') if invitation.event_datetime else '',
+            invitation.venue_name,
+            invitation.rsvp_total_count,
+            invitation.rsvp_yes_count,
+            invitation.rsvp_maybe_count,
+            invitation.rsvp_no_count,
+            invitation.likes_count,
+        ])
+    return response
 
 
 @login_required(login_url='login')
@@ -222,7 +293,7 @@ def success_view(request, pk):
         pk=pk,
         user=request.user,
     )
-    invitation_url = request.build_absolute_uri(f'/invitation/{invitation.pk}/')
+    invitation_url = _get_invitation_share_url(request, invitation)
     return render(request, 'lamp/success.html', {'invitation': invitation, 'invitation_url': invitation_url})
 
 @transaction.atomic
@@ -250,6 +321,11 @@ def like_invitation(request, pk):
                 'likes_count': invitation.likes_count,
             })
     return redirect('invitation_detail', pk=invitation.pk)
+
+def public_invitation_view(request, token):
+    invitation = get_object_or_404(Invitation, share_token=token)
+    return invitation_detail_view(request, invitation.pk)
+
 
 def invitation_detail_url_placeholder(request, pk):
     pass
@@ -283,6 +359,37 @@ def invitation_detail_view(request, pk):
         'has_liked': has_liked,
     }
     return render(request, 'lamp/detail.html', context)
+
+@login_required(login_url='login')
+@transaction.atomic
+def duplicate_invitation_view(request, pk):
+    invitation = get_object_or_404(Invitation, pk=pk, user=request.user)
+    if request.method == 'POST':
+        duplicate = Invitation.objects.get(pk=invitation.pk)
+        duplicate.pk = None
+        duplicate.id = uuid.uuid4()
+        duplicate.owner_token = uuid.uuid4()
+        duplicate.share_token = uuid.uuid4()
+        duplicate.user = request.user
+        duplicate.likes_count = 0
+        duplicate.title = f"{invitation.title} (Nusxa)"
+        duplicate.created_at = timezone.now()
+        duplicate.save()
+    return redirect('my_invitations')
+
+
+@login_required(login_url='login')
+@transaction.atomic
+def refresh_invitation_link_view(request, pk):
+    invitation = get_object_or_404(Invitation, pk=pk, user=request.user)
+    if request.method == 'POST':
+        invitation.share_token = uuid.uuid4()
+        invitation.save(update_fields=['share_token'])
+        share_url = _get_invitation_share_url(request, invitation)
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'share_url': share_url})
+    return redirect('my_invitations')
+
 
 @login_required(login_url='login')
 def delete_invitation_view(request, pk):
