@@ -351,14 +351,6 @@
                                 <i class="fa-solid fa-copy me-2"></i>Nusxalash
                             </button>
                         </form>
-                        <a href="{% url 'export_invitation_rsvps' invitation.pk %}" class="btn btn-outline-success rounded-pill py-2 invitation-action">
-                            <i class="fa-solid fa-file-csv me-2"></i>Mehmonlar ro‘yxatini yuklab olish
-                        </a>
-                        <button type="button" class="btn btn-outline-primary rounded-pill py-2 invitation-action refresh-share-link"
-                                data-refresh-url="{% url 'refresh_invitation_link' invitation.pk %}"
-                                data-current-url="{{ request.scheme }}://{{ request.get_host }}{% url 'invitation_share' invitation.share_token %}">
-                            <i class="fa-solid fa-rotate-right me-2"></i>Havolani yangilash
-                        </button>
                         <form method="POST" action="{% url 'delete_invitation' invitation.pk %}" onsubmit="return confirm('Haqiqatan ham bu taklifnomani o\'chirib tashlamoqchimisiz?');">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-link btn-sm text-danger text-decoration-none w-100">
@@ -386,40 +378,4 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.querySelectorAll('.refresh-share-link').forEach((button) => {
-    button.addEventListener('click', async () => {
-        const originalText = button.innerHTML;
-        const csrfToken = document.cookie
-            .split('; ')
-            .find((row) => row.startsWith('csrftoken='))
-            ?.split('=')[1];
-
-        try {
-            const response = await fetch(button.dataset.refreshUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken || '',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({})
-            });
-
-            const data = await response.json();
-            if (!data.success || !data.share_url) {
-                throw new Error('Share URL not returned');
-            }
-
-            button.dataset.currentUrl = data.share_url;
-            await navigator.clipboard.writeText(data.share_url);
-            button.innerHTML = '<i class="fa-solid fa-check me-2"></i>Yangi havola nusxalandi';
-            setTimeout(() => { button.innerHTML = originalText; }, 2000);
-        } catch (error) {
-            const fallbackUrl = button.dataset.currentUrl || window.location.origin;
-            window.prompt('Yangi taklifnoma havolasini nusxalang:', fallbackUrl);
-        }
-    });
-});
-</script>
 {% endblock %}

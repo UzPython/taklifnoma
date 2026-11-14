@@ -91,6 +91,14 @@ class InvitationPrivacyTests(TestCase):
                 # Should redirect to login (302)
                 self.assertEqual(response.status_code, 302)
 
+    def test_my_invitations_page_hides_guest_list_and_link_refresh_actions(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('my_invitations'))
+
+        self.assertNotContains(response, 'export_invitation_rsvps')
+        self.assertNotContains(response, 'refresh_invitation_link')
+        self.assertNotContains(response, 'Havolani yangilash')
+
     def test_shared_invitation_link_remains_public(self):
         response = self.client.get(
             reverse('invitation_detail', args=[self.invitation.pk])
